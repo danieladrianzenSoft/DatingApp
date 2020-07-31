@@ -16,7 +16,9 @@ namespace DatingApp.API.Data
 
         public async Task<User> Login(string username, string password)
         {
-            var user = await _context.Users.FirstOrDefaultAsync(x =>
+            // return the username but also the photos, so we can include the
+            // main photo in the nav bar.
+            var user = await _context.Users.Include(p => p.Photos).FirstOrDefaultAsync(x =>
                 x.Username == username);
             // check if we can find user in db with  matching username
             // already.
