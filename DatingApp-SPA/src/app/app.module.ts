@@ -32,6 +32,7 @@ import { AuthGuard } from './_guards/auth.guard';
 import { PreventUnsavedChangesGuard } from './_guards/prevent-unsaved-changes.guard';
 import { UserService } from './_services/user.service';
 import { PhotoEditorComponent } from './members/photo-editor/photo-editor.component';
+import { TimeagoModule } from 'ngx-timeago';
 
 export function tokenGetter(): any {
    return localStorage.getItem('token');
@@ -61,6 +62,7 @@ export function tokenGetter(): any {
       BsDatepickerModule.forRoot(),
       TabsModule.forRoot(),
       RouterModule.forRoot(appRoutes),
+      TimeagoModule.forRoot(),
       NgxGalleryModule,
       FileUploadModule,
       JwtModule.forRoot({
