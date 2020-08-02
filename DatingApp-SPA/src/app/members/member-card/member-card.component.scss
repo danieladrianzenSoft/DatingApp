@@ -33,3 +33,15 @@
 .animate {
     transition: all 0.4s ease-in-out;
 }
+
+.card {
+    position:relative;
+}
+
+.online {
+    position: absolute;
+    top: 40%;
+    left: 75%;
+    max-height: 20%;
+    max-width: 20%;
+}

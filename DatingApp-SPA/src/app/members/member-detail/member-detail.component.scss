@@ -12,8 +12,19 @@
     border-top: none;
 }
 .card {
+    position:relative;
+    border-color: #fff;
+}
+.img-thumbnail {
     border-color: #fff;
 }
 .tab-panel {
     border-color: #fff;
+}
+.online {
+    position: absolute;
+    top: 40%;
+    left: 75%;
+    max-height: 20%;
+    max-width: 20%;
 }

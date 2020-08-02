@@ -4,6 +4,7 @@ import { UserService } from 'src/app/_services/user.service';
 import { AlertifyService } from 'src/app/_services/alertify.service';
 import { ActivatedRoute } from '@angular/router';
 import { NgxGalleryOptions, NgxGalleryImage, NgxGalleryAnimation } from 'ngx-gallery-9';
+import { AuthService } from 'src/app/_services/auth.service';
 
 @Component({
   selector: 'app-member-detail',
@@ -16,7 +17,7 @@ export class MemberDetailComponent implements OnInit {
   galleryImages: NgxGalleryImage[];
 
   constructor(private userService: UserService, private alertify: AlertifyService,
-              private route: ActivatedRoute) { }
+              private route: ActivatedRoute, private authService: AuthService) { }
 
   ngOnInit(): any {
     this.route.data.subscribe(data => {
@@ -50,12 +51,10 @@ export class MemberDetailComponent implements OnInit {
     return imageUrls;
   }
 
-  // loadUser(): any{
-  //   this.userService.getUser(this.route.snapshot.params.id).subscribe((user: User) => {
-  //     this.user = user;
-  //   }, error => {
-  //     this.alertify.error(error);
-  //   });
+  // loggedIn(): boolean {
+  //   return this.authService.loggedIn();
+  //   // !! is shorthand for an if statement: if there's something in the token
+  //   // return true, otherwise return false.
   // }
 
 }
