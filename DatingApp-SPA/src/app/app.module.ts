@@ -36,6 +36,8 @@ import { UserService } from './_services/user.service';
 import { PhotoEditorComponent } from './members/photo-editor/photo-editor.component';
 import { TimeagoModule } from 'ngx-timeago';
 import { ListsResolver } from './_resolvers/lists.resolver';
+import { MessagesResolver } from './_resolvers/messages.resolver';
+import { MemberMessagesComponent } from './members/member-messages/member-messages.component';
 
 export function tokenGetter(): any {
    return localStorage.getItem('token');
@@ -54,6 +56,7 @@ export function tokenGetter(): any {
       MemberDetailComponent,
       MemberEditComponent,
       PhotoEditorComponent,
+      MemberMessagesComponent,
    ],
    imports: [
       BrowserModule,
@@ -88,7 +91,8 @@ export function tokenGetter(): any {
       MemberEditResolver,
       ErrorInterceptorProvider,
       PreventUnsavedChangesGuard,
-      ListsResolver
+      ListsResolver,
+      MessagesResolver
    ],
    bootstrap: [
       AppComponent
