@@ -3,11 +3,15 @@ using System.Text;
 using AutoMapper;
 using DatingApp.API.Data;
 using DatingApp.API.Helpers;
+using DatingApp.API.Models;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc.Authorization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -28,34 +32,22 @@ namespace DatingApp.API
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddDbContext<DataContext>(x =>
-                x.UseSqlite(Configuration.GetConnectionString("DefaultConnection")));
-
-            services.AddControllers().AddNewtonsoftJson(opt =>
-            {   // we have a circular dependency because its trying to serialize photographs from user, but then
-                // user refers back to photographs. Therefore, it throws an exception (system.text.json does too).
-                // Here we use newtonsoft.json instead which allows us to ignore issues with circular dependencies
-                // so no exception is thrown.
-                opt.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
+            // we must use AddIdentityCore to configure using jwt tokens.
+            IdentityBuilder builder = services.AddIdentityCore<User>(opt =>
+            {   // THIS IS JUST FOR TESTING: ENABLES WEAK PASSWORDS. CHANGE THIS LATER.
+                opt.Password.RequireDigit = false;
+                opt.Password.RequiredLength = 4;
+                opt.Password.RequireNonAlphanumeric = false;
+                opt.Password.RequireUppercase = false;
             });
-
-            services.Configure<CloudinarySettings>(Configuration.GetSection("CloudinarySettings"));
-
-            services.AddCors();
-
-            services.AddAutoMapper(typeof(AutoMapperProfiles));
-
-            services.AddScoped<IAuthRepository, AuthRepository>();
-
-            services.AddScoped<IDatingRepository, DatingRepository>();
 
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 .AddJwtBearer(options =>
                 {
-                    // Here we are specifying our authentication scheme, and converting our
-                    // token key in our appsettings.json to a byte array (because that's what's needed
-                    // for this functionality) from a string, using system.text.Encoding.
-                    options.TokenValidationParameters = new TokenValidationParameters
+                                // Here we are specifying our authentication scheme, and converting our
+                                // token key in our appsettings.json to a byte array (because that's what's needed
+                                // for this functionality) from a string, using system.text.Encoding.
+                                options.TokenValidationParameters = new TokenValidationParameters
                     {
                         ValidateIssuerSigningKey = true,
                         IssuerSigningKey = new SymmetricSecurityKey(Encoding.ASCII
@@ -64,6 +56,50 @@ namespace DatingApp.API
                         ValidateAudience = false
                     };
                 });
+
+            services.AddAuthorization(options =>
+            {
+                options.AddPolicy("RequireAdminRole", policy => policy.RequireRole("Admin"));
+                options.AddPolicy("ModeratePhotoRole", policy => policy.RequireRole("Admin","Moderator"));
+                options.AddPolicy("VipOnly", policy => policy.RequireRole("VIP"));
+
+            });
+
+            builder = new IdentityBuilder(builder.UserType, typeof(Role), builder.Services);
+            // create user store so we can add and create users.
+            builder.AddEntityFrameworkStores<DataContext>();
+            // add roles as part of this too.
+            builder.AddRoleValidator<RoleValidator<Role>>();
+            builder.AddRoleManager<RoleManager<Role>>();
+            builder.AddSignInManager<SignInManager<User>>();
+
+            services.AddDbContext<DataContext>(x =>
+                x.UseSqlite(Configuration.GetConnectionString("DefaultConnection")));
+
+            services.AddControllers(options =>
+            {   // By default: every user will have to authenticate every single method. We will
+                // add exceptions later for the registration and login methods.
+                var policy = new AuthorizationPolicyBuilder()
+                    .RequireAuthenticatedUser()
+                    .Build();
+
+                options.Filters.Add(new AuthorizeFilter(policy));
+            })
+                .AddNewtonsoftJson(opt =>
+                {   // we have a circular dependency because its trying to serialize photographs from user, but then
+                    // user refers back to photographs. Therefore, it throws an exception (system.text.json does too).
+                    // Here we use newtonsoft.json instead which allows us to ignore issues with circular dependencies
+                    // so no exception is thrown.
+                    opt.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
+                });
+
+            services.Configure<CloudinarySettings>(Configuration.GetSection("CloudinarySettings"));
+
+            services.AddCors();
+
+            services.AddAutoMapper(typeof(AutoMapperProfiles));
+
+            services.AddScoped<IDatingRepository, DatingRepository>();
 
             services.AddScoped<LogUserActivity>();
         }

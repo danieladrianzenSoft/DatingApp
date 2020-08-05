@@ -18,7 +18,6 @@ using Microsoft.Extensions.Options;
 
 namespace DatingApp.API.Controllers
 {
-    [Authorize]
     [Route("api/users/{userId}/photos")]
     [ApiController]
     public class PhotosController : ControllerBase
@@ -67,7 +66,7 @@ namespace DatingApp.API.Controllers
                 return Unauthorized();
             }
 
-            var userFromRepo = await _repo.GetUser(userId);
+            var userFromRepo = await _repo.GetUser(userId, true);
 
             var file = photoForCreationDto.File;
 
@@ -129,7 +128,7 @@ namespace DatingApp.API.Controllers
                 return Unauthorized();
             }
 
-            var user = await _repo.GetUser(userId);
+            var user = await _repo.GetUser(userId, true);
 
             // Then we check if the id of the photo passed in matches any of the id's
             // in our photo array. if no, also return unothorized.
@@ -144,6 +143,12 @@ namespace DatingApp.API.Controllers
             if (photoFromRepo.IsMain)
             {
                 return BadRequest("This is already the main photo");
+            }
+
+            // and we check if it has been approved or not.
+            if (photoFromRepo.IsApproved == false)
+            {
+                return BadRequest("This photo needs to be approved first");
             }
 
             // We use our datingrepository to get the main photo for a user. Then,
@@ -171,7 +176,7 @@ namespace DatingApp.API.Controllers
                 return Unauthorized();
             }
 
-            var user = await _repo.GetUser(userId);
+            var user = await _repo.GetUser(userId, true);
 
             // Then we check if the id of the photo passed in matches any of the id's
             // in our photo array. if no, also return unothorized.
