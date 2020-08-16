@@ -1,10 +1,11 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { map } from 'rxjs/operators';
-import { BehaviorSubject, Observable} from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 import { JwtHelperService } from '@auth0/angular-jwt';
 import { environment } from 'src/environments/environment';
 import { User } from '../_models/user';
+import { Router } from '@angular/router';
 
 @Injectable({
   providedIn: 'root'
@@ -14,10 +15,12 @@ export class AuthService {
   jwtHelper = new JwtHelperService();
   decodedToken: any;
   currentUser: User;
+  unverifiedAccount = new BehaviorSubject<boolean>(false);
   photoUrl = new BehaviorSubject<string>('../../assets/user.png');
   currentPhotoUrl = this.photoUrl.asObservable();
 
-  constructor(private http: HttpClient) { }
+
+  constructor(private http: HttpClient, private router: Router) { }
 
   changeMemberPhoto(photoUrl: string): any{
     this.photoUrl.next(photoUrl);
@@ -30,11 +33,14 @@ export class AuthService {
         map((response: any) => {
           const user = response; // user here will be containing token object.
           if (user) {
-            localStorage.setItem('token', user.token);
-            localStorage.setItem('user', JSON.stringify(user.user));
-            this.decodedToken = this.jwtHelper.decodeToken(user.token);
-            this.currentUser = user.user;
-            this.changeMemberPhoto(this.currentUser.photoUrl);
+            // if (user.isVerified === true) {
+              localStorage.setItem('token', user.token);
+              localStorage.setItem('user', JSON.stringify(user.user));
+              this.decodedToken = this.jwtHelper.decodeToken(user.token);
+              this.currentUser = user.user;
+              this.changeMemberPhoto(this.currentUser.photoUrl);
+            // }
+            // this.router.navigate()
           }
         })
       );
@@ -42,6 +48,10 @@ export class AuthService {
 
   register(user: User): any{
     return this.http.post(this.baseUrl + 'register', user);
+  }
+
+  confirmEmail(userId: string, token: string): any{
+    return this.http.post(this.baseUrl + 'confirmEmail?userId=' + userId + '&token=' + encodeURIComponent(token), {});
   }
 
   loggedIn(): any{
@@ -60,6 +70,14 @@ export class AuthService {
       }
     });
     return isMatch;
+  }
+
+  sendEmailVerification(model: any): any{
+    return this.http.post(this.baseUrl + 'sendEmailVerification', model);
+  }
+
+  checkEmailExists(email: string): any{
+    return this.http.get(this.baseUrl + 'emailexists?email=' + email);
   }
 
 }

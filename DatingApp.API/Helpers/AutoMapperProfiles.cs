@@ -22,7 +22,9 @@ namespace DatingApp.API.Helpers
                     s.DateOfBirth.CalculateAge()));
             CreateMap<Photo, PhotosForDetailedDto>();
             CreateMap<UserForUpdateDto, User>();
+            CreateMap<User, UserForLogoutDto>();
             CreateMap<Photo, PhotoForReturnDto>();
+            CreateMap<Like, LikeToReturnDto>();
             CreateMap<PhotoForCreationDto, Photo>();
             CreateMap<UserForRegisterDto, User>();
             CreateMap<MessageForCreationDto, Message>().ReverseMap();

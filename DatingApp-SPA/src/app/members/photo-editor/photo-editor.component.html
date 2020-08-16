@@ -33,11 +33,8 @@
             Drop photos here
         </div>
 
-        Multiple
         <input type="file" ng2FileSelect [uploader]="uploader" multiple  /><br/>
 
-        Single
-        <input type="file" ng2FileSelect [uploader]="uploader" />
     </div>
 
     <div class="col-md-9" style="margin-bottom: 40px" *ngIf="uploader?.queue?.length">
@@ -67,18 +64,21 @@
                     <div class="progress-bar" role="progressbar" [ngStyle]="{ 'width': uploader.progress + '%' }"></div>
                 </div>
             </div>
-            <button type="button" class="btn btn-success btn-s"
-                    (click)="uploader.uploadAll()" [disabled]="!uploader.getNotUploadedItems().length">
-                <span class="fa fa-upload"></span> Upload
-            </button>
-            <button type="button" class="btn btn-warning btn-s"
-                    (click)="uploader.cancelAll()" [disabled]="!uploader.isUploading">
-                <span class="fa fa-ban"></span> Cancel
-            </button>
-            <button type="button" class="btn btn-danger btn-s"
-                    (click)="uploader.clearQueue()" [disabled]="!uploader.queue.length">
-                <span class="fa fa-trash"></span> Remove
-            </button>
+            <div class="btn-group d-flex justify-content-between">
+                <button type="button" class="btn btn-success btn-sm" (click)="uploader.uploadAll()"
+                    [disabled]="!uploader.getNotUploadedItems().length">
+                    <span class="fa fa-upload"></span> Upload
+                </button>
+                <button type="button" class="btn btn-warning btn-sm" (click)="uploader.cancelAll()"
+                    [disabled]="!uploader.isUploading">
+                    <span class="fa fa-ban"></span> Cancel
+                </button>
+                <button type="button" class="btn btn-danger btn-sm" (click)="uploader.clearQueue()"
+                    [disabled]="!uploader.queue.length">
+                    <span class="fa fa-trash"></span> Remove
+                </button>
+            </div>
+
         </div>
 
     </div>

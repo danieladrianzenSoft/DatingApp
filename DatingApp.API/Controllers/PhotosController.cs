@@ -8,6 +8,7 @@ using CloudinaryDotNet;
 using CloudinaryDotNet.Actions;
 using DatingApp.API.Data;
 using DatingApp.API.Dtos;
+using DatingApp.API.Errors;
 using DatingApp.API.Helpers;
 using DatingApp.API.Models;
 using Microsoft.AspNetCore.Authorization;
@@ -63,7 +64,7 @@ namespace DatingApp.API.Controllers
             // check to make sure the user matches the logged in user, return unothorized if not.
             if (userId != int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value))
             {
-                return Unauthorized();
+                return Unauthorized(new ApiResponse(401));
             }
 
             var userFromRepo = await _repo.GetUser(userId, true);
@@ -115,7 +116,7 @@ namespace DatingApp.API.Controllers
                     new { userId, id = photo.Id}, photoToReturn );
             }
 
-            return BadRequest("Could not add the photo");
+            return BadRequest(new ApiResponse(400));
         }
 
         [HttpPost("{id}/setMain")]
@@ -125,7 +126,7 @@ namespace DatingApp.API.Controllers
             // user is authorized for this method. 
             if (userId != int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value))
             {
-                return Unauthorized();
+                return Unauthorized(new ApiResponse(401));
             }
 
             var user = await _repo.GetUser(userId, true);
@@ -134,7 +135,7 @@ namespace DatingApp.API.Controllers
             // in our photo array. if no, also return unothorized.
             if (user.Photos.Any(p => p.Id == id) == false)
             {
-                return Unauthorized();
+                return Unauthorized(new ApiResponse(401));
             }
 
             var photoFromRepo = await _repo.GetPhoto(id);
@@ -142,13 +143,13 @@ namespace DatingApp.API.Controllers
             // now we check if the photo selected is already the main photo.
             if (photoFromRepo.IsMain)
             {
-                return BadRequest("This is already the main photo");
+                return BadRequest(new ApiResponse(400, "This is already the main photo"));
             }
 
             // and we check if it has been approved or not.
             if (photoFromRepo.IsApproved == false)
             {
-                return BadRequest("This photo needs to be approved first");
+                return BadRequest(new ApiResponse(400, "The photo needs to be approved first"));
             }
 
             // We use our datingrepository to get the main photo for a user. Then,
@@ -162,7 +163,7 @@ namespace DatingApp.API.Controllers
             if (await _repo.SaveAll())
                 return NoContent();
 
-            return BadRequest("Could not set photo to main");
+            return BadRequest(new ApiResponse(400));
 
         }
 
@@ -173,7 +174,7 @@ namespace DatingApp.API.Controllers
             // user is authorized for this method. 
             if (userId != int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value))
             {
-                return Unauthorized();
+                return Unauthorized(new ApiResponse(401));
             }
 
             var user = await _repo.GetUser(userId, true);
@@ -182,7 +183,7 @@ namespace DatingApp.API.Controllers
             // in our photo array. if no, also return unothorized.
             if (user.Photos.Any(p => p.Id == id) == false)
             {
-                return Unauthorized();
+                return Unauthorized(new ApiResponse(401));
             }
 
             var photoFromRepo = await _repo.GetPhoto(id);
@@ -190,7 +191,7 @@ namespace DatingApp.API.Controllers
             // now we check if the photo selected is already the main photo.
             if (photoFromRepo.IsMain)
             {
-                return BadRequest("You cannot delete your main photo");
+                return BadRequest(new ApiResponse(400, "Main photo cannot be deleted"));
             }
 
 
@@ -221,7 +222,7 @@ namespace DatingApp.API.Controllers
                 return Ok();
             }
 
-            return BadRequest("Failed to delete the photo");
+            return BadRequest(new ApiResponse(400));
         }
 
     }

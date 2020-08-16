@@ -1,8 +1,9 @@
-import { Component, OnInit, Input } from '@angular/core';
+import { Component, OnInit, Input, Output } from '@angular/core';
 import { User } from '../../_models/user';
 import { AuthService } from 'src/app/_services/auth.service';
 import { UserService } from 'src/app/_services/user.service';
 import { AlertifyService } from 'src/app/_services/alertify.service';
+import { Route } from '@angular/compiler/src/core';
 
 @Component({
   selector: 'app-member-card',
@@ -11,26 +12,27 @@ import { AlertifyService } from 'src/app/_services/alertify.service';
 })
 export class MemberCardComponent implements OnInit {
   @Input() user: User;
+  route: Route;
+  activityPictureUrl: string;
 
   constructor(private authService: AuthService, private userService: UserService,
-              private alertifyService: AlertifyService) { }
+              private alertify: AlertifyService) { }
 
   ngOnInit(): void {
   }
 
-  sendLike(id: number): any{
+  sendLikeUnlike(id: number): any{
     // this id represents recipient id.
-    this.userService.sendLike(this.authService.decodedToken.nameid, id).subscribe( data => {
-      this.alertifyService.success('You have liked: ' + this.user.knownAs);
+    this.userService.sendLikeUnlike(this.authService.decodedToken.nameid, id).subscribe( data => {
+      if (data === true) {
+        this.alertify.warning('You have unliked: ' + this.user.displayName);
+      }
+      else{
+        this.alertify.success('You have liked: ' + this.user.displayName);
+      }
     }, error => {
-      this.alertifyService.error(error);
+        this.alertify.error(error);
     });
+
   }
-
-  // loggedIn(): boolean {
-  //   return this.authService.loggedIn();
-  //   // !! is shorthand for an if statement: if there's something in the token
-  //   // return true, otherwise return false.
-  // }
-
 }

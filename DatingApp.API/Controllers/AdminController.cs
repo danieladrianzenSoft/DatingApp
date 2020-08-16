@@ -5,6 +5,7 @@ using CloudinaryDotNet;
 using CloudinaryDotNet.Actions;
 using DatingApp.API.Data;
 using DatingApp.API.Dtos;
+using DatingApp.API.Errors;
 using DatingApp.API.Helpers;
 using DatingApp.API.Models;
 using Microsoft.AspNetCore.Authorization;
@@ -80,14 +81,14 @@ namespace DatingApp.API.Controllers
 
             if (result.Succeeded == false)
             {
-                return BadRequest("Failed to add to roles");
+                return BadRequest(new ApiResponse(400));
             }
 
             result = await _userManager.RemoveFromRolesAsync(user, userRoles.Except(selectedRoles));
 
             if (result.Succeeded == false)
             {
-                return BadRequest("failed to remove the roles");
+                return BadRequest(new ApiResponse(400));
             }
 
             return Ok(await _userManager.GetRolesAsync(user));
@@ -137,7 +138,7 @@ namespace DatingApp.API.Controllers
                 .FirstOrDefaultAsync(p => p.Id == photoId);
 
             if (photo.IsMain)
-                return BadRequest("You cannot reject the main photo");
+                return BadRequest(new ApiResponse(400,"Main photo cannot be rejected"));
 
             if (photo.PublicId != null)
             {

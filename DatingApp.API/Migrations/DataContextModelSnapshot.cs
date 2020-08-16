@@ -156,6 +156,9 @@ namespace DatingApp.API.Migrations
                     b.Property<DateTime>("DateOfBirth")
                         .HasColumnType("TEXT");
 
+                    b.Property<string>("DisplayName")
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("Email")
                         .HasColumnType("TEXT")
                         .HasMaxLength(256);
@@ -172,8 +175,8 @@ namespace DatingApp.API.Migrations
                     b.Property<string>("Introduction")
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("KnownAs")
-                        .HasColumnType("TEXT");
+                    b.Property<bool>("IsOnline")
+                        .HasColumnType("INTEGER");
 
                     b.Property<DateTime>("LastActive")
                         .HasColumnType("TEXT");

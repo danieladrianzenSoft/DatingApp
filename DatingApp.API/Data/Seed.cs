@@ -38,13 +38,16 @@ namespace DatingApp.API.Data
                     userManager.CreateAsync(user, "password").Wait();
                     userManager.AddToRoleAsync(user, "Member");
                     user.Photos.SingleOrDefault().IsApproved = true;
+                    user.EmailConfirmed = true;
                 }
 
                 // create admin user
 
                 var adminUser = new User
                 {
-                    UserName = "Admin"
+                    UserName = "Admin",
+                    Email = "admin@email.com",
+                    EmailConfirmed = true
                 };
 
                 // change this to make password much more secure.

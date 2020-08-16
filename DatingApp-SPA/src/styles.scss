@@ -11,6 +11,7 @@
     border: 1px solid #ddd;
     padding: 10px;
     border-radius: 4px;
+    font-size: 98%;
   }
   
   .nav-tabs > li.open, .member-tabset > .nav-tabs > li:hover {
@@ -51,4 +52,33 @@
     border: 0;
     border-top: 1px solid #eee;
     padding: 15px 0;
+  }
+
+  .alertify-notifier .ajs-message.ajs-error{
+    color: #AA4A45;
+    background: rgba($color: #FFDFDF, $alpha: 1);
+    text-shadow: none;
+    border-color: #AA4A45;
+  }
+
+  .alertify-notifier .ajs-message.ajs-success{
+    color: #507541;
+    background: rgba($color: #E1EFDA, $alpha: 1);
+    text-shadow: none;
+    border-color: #507541;
+  }
+
+  .alertify-notifier .ajs-message.ajs-warning {
+    background: rgba($color: #FAF8E6, $alpha: 1);
+    border-color: #827041;
+    color: #827041;
+    text-shadow: none;
+  }
+
+  .alertify-notifier .ajs-message {
+    background: rgba($color: #DDECF5, $alpha: 1);
+    color: #3F7191;
+    text-align: center;
+    border: solid 1px #3F7191;
+    border-radius: 2px;
   }

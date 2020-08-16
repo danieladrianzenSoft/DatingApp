@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { CanActivate, Router, ActivatedRouteSnapshot } from '@angular/router';
+import { CanActivate, Router, ActivatedRouteSnapshot, RouterStateSnapshot } from '@angular/router';
 import { AuthService } from '../_services/auth.service';
 import { AlertifyService } from '../_services/alertify.service';
 
@@ -12,7 +12,7 @@ export class AuthGuard implements CanActivate {
     private router: Router,
     private alertify: AlertifyService) {}
 
-  canActivate(next: ActivatedRouteSnapshot): boolean {
+  canActivate(next: ActivatedRouteSnapshot, state: RouterStateSnapshot): boolean {
 
     const roles = next.firstChild.data.roles as Array<string>;
 
@@ -31,10 +31,12 @@ export class AuthGuard implements CanActivate {
     if (this.authService.loggedIn()){
       return true;
     }
-    this.alertify.error('Not authorized, please log in');
-    this.router.navigate(['/home']);
 
-    return false;
+    this.router.navigate(['/login'], {queryParams: {returnUrl: state.url}});
+    this.alertify.error('Not authorized, please log in');
+    // this.router.navigate(['/login']);
+
+    // return false;
   }
 
 }

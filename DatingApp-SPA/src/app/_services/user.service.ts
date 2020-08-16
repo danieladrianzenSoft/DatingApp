@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { environment } from '../../environments/environment';
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { User } from '../_models/user';
+import { Like } from '../_models/like';
 import { Observable } from 'rxjs';
 import { PaginatedResult } from '../_models/Pagination';
 import { map } from 'rxjs/operators';
@@ -67,8 +68,8 @@ export class UserService {
     return this.http.delete(this.baseUrl + 'users/' + userId + '/photos/' + id);
   }
 
-  sendLike(id: number, recipientId: number): any{
-    return this.http.post(this.baseUrl + 'users/' + id + '/like/' + recipientId, {});
+  sendLikeUnlike(id: number, recipientId: number): any{
+    return this.http.post(this.baseUrl + 'users/' + id + '/likeunlike/' + recipientId, {});
   }
 
   getMessages(id: number, page?, itemsPerPage?, messageContainer?): any{
@@ -113,4 +114,7 @@ export class UserService {
     .subscribe();
   }
 
+  goOffline(userId: number): any{
+    return this.http.post(this.baseUrl + 'users/' + userId + '/gooffline', {}).subscribe();
+  }
 }

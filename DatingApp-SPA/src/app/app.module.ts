@@ -1,4 +1,4 @@
-import { BrowserModule } from '@angular/platform-browser';
+import { BrowserModule, HammerModule, HammerGestureConfig} from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { FileUploadModule } from 'ng2-file-upload/';
@@ -11,6 +11,8 @@ import { TabsModule } from 'ngx-bootstrap/tabs';
 import { ButtonsModule } from 'ngx-bootstrap/buttons';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { HttpClientModule } from '@angular/common/http';
+import { CollapseModule } from 'ngx-bootstrap/collapse';
+import { ModalModule } from 'ngx-bootstrap/modal';
 
 import { AppComponent } from './app.component';
 import { NavComponent } from './nav/nav.component';
@@ -44,10 +46,20 @@ import { UserManagementComponent } from './admin/user-management/user-management
 import { PhotoManagementComponent } from './admin/photo-management/photo-management.component';
 import { AdminService } from './_services/admin.service';
 import { RolesModalComponent } from './admin/roles-modal/roles-modal.component';
-import { ModalModule } from 'ngx-bootstrap/modal';
+import { LoginComponent } from './login/login.component';
+import { ConfirmEmailComponent } from './verify-account/confirm-email/confirm-email';
+import { ConfirmEmailResolver } from './_resolvers/confirm-email.resolver';
+import { AwaitingEmailVerificationComponent } from './verify-account/awaiting-email-verification/awaiting-email-verification.component';
+import { TextInputComponent } from './shared/text-input/text-input.component';
 
 export function tokenGetter(): any {
    return localStorage.getItem('token');
+}
+
+export class MyHammerConfig extends HammerGestureConfig  {
+   overrides = {
+     swipe: {velocity: 0.4, threshold: 20} // override default settings
+   };
 }
 
 @NgModule({
@@ -68,7 +80,11 @@ export function tokenGetter(): any {
       HasRoleDirective,
       UserManagementComponent,
       PhotoManagementComponent,
-      RolesModalComponent
+      RolesModalComponent,
+      LoginComponent,
+      ConfirmEmailComponent,
+      AwaitingEmailVerificationComponent,
+      TextInputComponent,
    ],
    imports: [
       BrowserModule,
@@ -84,8 +100,10 @@ export function tokenGetter(): any {
       RouterModule.forRoot(appRoutes),
       TimeagoModule.forRoot(),
       ModalModule.forRoot(),
+      CollapseModule.forRoot(),
       NgxGalleryModule,
       FileUploadModule,
+      HammerModule,
       JwtModule.forRoot({
          config: {
             tokenGetter,
@@ -103,10 +121,15 @@ export function tokenGetter(): any {
       MemberDetailResolver,
       MemberListResolver,
       MemberEditResolver,
+      ConfirmEmailResolver,
       ErrorInterceptorProvider,
       PreventUnsavedChangesGuard,
       ListsResolver,
-      MessagesResolver
+      MessagesResolver,
+      // {
+      //    provide: HAMMER_GESTURE_CONFIG,
+      //    useClass: MyHammerConfig
+      //  }
    ],
    entryComponents: [
       RolesModalComponent
@@ -115,4 +138,5 @@ export function tokenGetter(): any {
       AppComponent
    ]
 })
+
 export class AppModule { }

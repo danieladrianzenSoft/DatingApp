@@ -1,42 +1,72 @@
-<nav class="navbar navbar-expand-md navbar-dark bg-primary">
-    <div class="container">
+<nav *ngIf="visible" class="navbar navbar-expand-lg navbar-dark bg-primary flex-column flex-md-row" id="navbar">
+    <div class="container" style="justify-content: space-between;">
         <a class="navbar-brand" [routerLink]="['/home']">Dating App</a>
-        <ul *ngIf="loggedIn()==true" class="navbar-nav mr-auto">
-            <li class="nav-item active" routerLinkActive="active">
-                <a class="nav-link" [routerLink]="['/members']">Matches</a>
-            </li>
-            <li class="nav-item" routerLinkActive="active" >
-                <a class="nav-link" [routerLink]="['/lists']">Lists</a>
-            </li>
-            <li class="nav-item" routerLinkActive="active" >
-                <a class="nav-link" [routerLink]="['/messages']">Messages</a>
-            </li>
-            <li *appHasRole="['Admin','Moderator']" class="nav-item" routerLinkActive="active" >
-                <a class="nav-link" [routerLink]="['/admin']">Admin</a>
-            </li>
-        </ul>
-    
-        <div *ngIf="loggedIn()" class="dropdown" dropdown>
+        <button class="navbar-toggler"
+            type="button" 
+            *ngIf="loggedIn()==true" 
+            data-toggle="collapse"
+            data-target="#navbarDropdown"
+            aria-controls="navbarDropdown"
+            aria-expanded="false"
+            aria-label="Toggle navigation"
+            (click)="isCollapsed = !isCollapsed">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarDropdown" [collapse]="isCollapsed">
+            <ul *ngIf="loggedIn()==true" class="navbar-nav mr-auto">
+                <li class="nav-item" routerLinkActive="active" (click)="isCollapsed = true">
+                    <a class="nav-link" [routerLink]="['/members']">Matches</a>
+                </li>
+                <li class="nav-item" routerLinkActive="active" (click)="isCollapsed = true">
+                    <a class="nav-link" [routerLink]="['/lists']">Lists</a>
+                </li>
+                <li class="nav-item" routerLinkActive="active" (click)="isCollapsed = true">
+                    <a class="nav-link" [routerLink]="['/messages']">Messages</a>
+                </li>
+                <li *appHasRole="['Admin','Moderator']" class="nav-item" (click)="isCollapsed = true" routerLinkActive="active">
+                    <a class="nav-link" [routerLink]="['/admin']">Admin</a>
+                </li>
+                <li class="nav-item d-lg-none" (click)="isCollapsed = true" routerLinkActive="active">
+                    <a class="nav-link" [routerLink]="['/member/edit']"><i class="fa fa-user"></i> Edit Profile</a>
+                </li>
+                <li class="nav-item d-lg-none" (click)="logOut()" routerLinkActive="active" style="cursor:pointer">
+                    <a class="nav-link"><i class="fa fa-sign-out"></i> Logout</a>
+                </li>
+            </ul>
+        </div>
+                
+        <div *ngIf="loggedIn()==true" class="dropdown d-none d-lg-block d-xl-block" dropdown>
             <span class="mr-1">
-                <img src="{{photoUrl || '../../../../assets/user.png'}}" alt="">
+                <img src="{{photoUrl || '../../../../assets/user.png'}}" alt="" class="img-circle rounded-circle">
             </span>
             <a class="dropdown-toggle text-light" dropdownToggle>
-              Welcome {{authService.decodedToken?.unique_name | titlecase}}
+                Welcome {{authService.decodedToken?.unique_name | titlecase}}
             </a>
-          
+        
             <div class="dropdown-menu mt-3" *dropdownMenu>
-              <a class="dropdown-item" [routerLink]="['/member/edit']"><i class="fa fa-user"></i> Edit Profile</a>
-              <div class="dropdown-divider"></div>
-              <a class="dropdown-item" (click)="logOut()"><i class="fa fa-sign-out"></i> Logout</a>
+                <a class="dropdown-item" [routerLink]="['/member/edit']"><i class="fa fa-user"></i> Edit Profile</a>
+                <div class="dropdown-divider"></div>
+                <a class="dropdown-item" (click)="logOut()"><i class="fa fa-sign-out"></i> Logout</a>
             </div>
-          </div>
+        </div>
+
+        <div class="btn-group" *ngIf="loggedIn()==false">
+            <div id="registerButton" class="my-2 my-lg-0">
+                <button class="btn btn-primary my-2 my-sm-0" [routerLink]="['/register']">Register</button>
+            </div>
+            <div id="loginButton" class="my-2 my-lg-0">
+                <button class="btn btn-info my-2 my-sm-0" [routerLink]="['/login']">Login</button>
+            </div>
+        </div>
+
     
-        <form *ngIf="loggedIn()==false" #loginForm="ngForm" class="form-inline my-2 my-lg-0" (ngSubmit)="login()">
+        <!-- <form *ngIf="loggedIn()==false" #loginForm="ngForm" class="form-inline my-2 my-lg-0" (ngSubmit)="login()">
             <input class="form-control mr-sm-2" type="text" name="username" 
                 placeholder="Username" required [(ngModel)]="model.username">
             <input class="form-control mr-sm-2" type="password" name="password"
                 placeholder="Password" required [(ngModel)]="model.password">
             <button [disabled]="loginForm.valid == false" class="btn btn-success my-2 my-sm-0" type="submit">Login</button>
-        </form>
+        </form> -->
     </div>
 </nav>

@@ -6,6 +6,7 @@ import { ActivatedRoute } from '@angular/router';
 import { NgxGalleryOptions, NgxGalleryImage, NgxGalleryAnimation } from 'ngx-gallery-9';
 import { AuthService } from 'src/app/_services/auth.service';
 import { TabsetComponent } from 'ngx-bootstrap/tabs';
+import { Like } from 'src/app/_models/like';
 
 @Component({
   selector: 'app-member-detail',
@@ -15,6 +16,8 @@ import { TabsetComponent } from 'ngx-bootstrap/tabs';
 export class MemberDetailComponent implements OnInit {
   @ViewChild('memberTabs', {static: true}) memberTabs: TabsetComponent;
   user: User;
+  like: Like;
+  // lastActive: any;
   galleryOptions: NgxGalleryOptions[];
   galleryImages: NgxGalleryImage[];
 
@@ -24,6 +27,7 @@ export class MemberDetailComponent implements OnInit {
   ngOnInit(): any {
     this.route.data.subscribe(data => {
       this.user = data.user;
+      // this.lastActive = this.user.lastActive.toString();
     });
 
     this.route.queryParams.subscribe(params => {
@@ -42,7 +46,6 @@ export class MemberDetailComponent implements OnInit {
       }
     ];
     this.galleryImages = this.getImages();
-
   }
 
   getImages(): any{
@@ -62,10 +65,19 @@ export class MemberDetailComponent implements OnInit {
     this.memberTabs.tabs[tabId].active = true;
   }
 
-  // loggedIn(): boolean {
-  //   return this.authService.loggedIn();
-  //   // !! is shorthand for an if statement: if there's something in the token
-  //   // return true, otherwise return false.
-  // }
+  sendLikeUnlike(id: number): any{
+    // this id represents recipient id.
+    this.userService.sendLikeUnlike(this.authService.decodedToken.nameid, id).subscribe( data => {
+      if (data === true) {
+        this.alertify.warning('You have unliked: ' + this.user.displayName);
+      }
+      else{
+        this.alertify.success('You have liked: ' + this.user.displayName);
+      }
+    }, error => {
+        this.alertify.error(error);
+    });
 
+  }
 }
+

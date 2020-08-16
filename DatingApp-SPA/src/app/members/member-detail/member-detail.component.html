@@ -1,8 +1,9 @@
 <div class="container mt-4">
     <div class="row">
         <div class="col-sm-4">
+            <h1>{{user.displayName}}'s Profile</h1>
             <div class="card">
-                <img class="card-img-top img-thumbnail" src="{{user.photoUrl || '../../../../../assets/user.png'}}" alt="{{user.knownAs}}">
+                <img class="card-img-top img-thumbnail" src="{{user.photoUrl || '../../../../../assets/user.png'}}" alt="{{user.displayName}}">
                 <!--<img class="online" *ngIf="loggedIn()" src="../../../../../assets/online.png" alt="online">-->
                 <div class="card-body">
                     <div>
@@ -24,8 +25,8 @@
                 </div>
                 <div class="card-footer">
                     <div class="btn-group d-flex">
-                        <button class="btn btn-primary w-100">Like</button>
-                        <button (click)="selectTab(3)" class="btn btn-success w-100">Message</button>
+                        <button (click)="sendLikeUnlike(user.id)" class="btn btn-primary w-100">Like</button>
+                        <button (click)="selectTab(3)" class="btn btn-info w-100">Message</button>
                     </div>
                 </div>
             </div>
@@ -33,15 +34,15 @@
         <div class="col-sm-8">
             <div class="tab-panel">
                 <tabset class="member-tabset" #memberTabs>
-                    <tab heading="About {{user.knownAs}}">
+                    <tab heading="About {{user.displayName}}">
                         <h4>Description</h4>
-                        <p>{{user.introduction || user.knownAs + " has not added a description yet"}}</p>
+                        <p>{{user.introduction || user.displayName + " has not added a description yet"}}</p>
                         <h4>Looking For</h4>
-                        <p>{{user.lookingFor || user.knownAs + " has not add any preferences"}}</p>
+                        <p>{{user.lookingFor || user.displayName + " has not add any preferences"}}</p>
                     </tab>
                     <tab heading="Interests">
                         <h4>Interests</h4>
-                        <p>{{user.interests || user.knownAs + " has not added any interests yet"}}</p>
+                        <p>{{user.interests || user.displayName + " has not added any interests yet"}}</p>
                     </tab>
                     <tab heading="Photos">
                         <ngx-gallery [options]="galleryOptions" [images]="galleryImages"></ngx-gallery>

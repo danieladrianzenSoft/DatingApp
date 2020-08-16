@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using AutoMapper;
 using DatingApp.API.Data;
 using DatingApp.API.Dtos;
+using DatingApp.API.Errors;
 using DatingApp.API.Helpers;
 using DatingApp.API.Models;
 using Microsoft.AspNetCore.Authorization;
@@ -31,13 +32,13 @@ namespace DatingApp.API.Controllers
         {
             if (userId != int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value))
             {
-                return Unauthorized();
+                return Unauthorized(new ApiResponse(401));
             }
 
             var messageFromRepo = await _repo.GetMessage(id);
 
             if (messageFromRepo == null)
-                return NotFound();
+                return NotFound(new ApiResponse(404));
 
             return Ok(messageFromRepo);
         }
@@ -47,7 +48,7 @@ namespace DatingApp.API.Controllers
         {
             if (userId != int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value))
             {
-                return Unauthorized();
+                return Unauthorized(new ApiResponse(401));
             }
 
             messageParams.UserId = userId;
@@ -67,7 +68,7 @@ namespace DatingApp.API.Controllers
         {
             if (userId != int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value))
             {
-                return Unauthorized();
+                return Unauthorized(new ApiResponse(401));
             }
 
             var messageFromRepo = await _repo.GetMessageThread(userId, recipientId);
@@ -85,7 +86,7 @@ namespace DatingApp.API.Controllers
 
             if (sender.Id != int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value))
             {
-                return Unauthorized();
+                return Unauthorized(new ApiResponse(401));
             }
 
             messageForCreationDto.SenderId = userId;
@@ -93,7 +94,7 @@ namespace DatingApp.API.Controllers
             var recipient = await _repo.GetUser(messageForCreationDto.RecipientId, false);
 
             if (recipient == null)
-                return BadRequest("Could not find user");
+                return NotFound(new ApiResponse(404));
 
             var message = _mapper.Map<Message>(messageForCreationDto);
 
@@ -119,7 +120,7 @@ namespace DatingApp.API.Controllers
 
             if (userId != int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value))
             {
-                return Unauthorized();
+                return Unauthorized(new ApiResponse(401));
             }
 
             var messageFromRepo = await _repo.GetMessage(id);
@@ -147,13 +148,13 @@ namespace DatingApp.API.Controllers
         {
             if (userId != int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value))
             {
-                return Unauthorized();
+                return Unauthorized(new ApiResponse(401));
             }
 
             var message = await _repo.GetMessage(id);
 
             if (message.RecipientId != userId)
-                return Unauthorized();
+                return Unauthorized(new ApiResponse(401));
 
 
             message.IsRead = true;

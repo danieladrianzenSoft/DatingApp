@@ -1,0 +1,28 @@
+<div *ngIf="showNotVerified==false" class="container mt-5">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div *ngIf="loggedIn()==false" class="col-lg-4 col-md-5 col-sm-6">
+                <form #loginForm="ngForm" (ngSubmit)="login()">
+                    <h2 class="text-center text-primary">Login</h2>
+                    <hr>
+                    <div class="form-group">
+                        <input class="form-control mr-3" type="text" name="username" 
+                        placeholder="Username" required [(ngModel)]="model.username">
+                    </div>
+                    <div class="form-group">
+                        <input class="form-control mr-3" type="password" name="password"
+                        placeholder="Password" required [(ngModel)]="model.password">
+                    </div>
+                    <div class="form-group text-center">
+                        <button [disabled]="loginForm.valid == false" class="btn btn-info btn-block" type="submit">Login</button>
+                        <button class="btn btn-default btn-block" type="button" [routerLink]="['/home']">Cancel</button>
+                    </div>
+                </form>
+                <p class="text-center mt-4">Don't have an account yet? <span class="text-primary font-weight-bold" style="cursor:pointer" [routerLink]="['/register']" routerLinkActive="router-link-active">Sign up</span></p> 
+            </div>
+        </div>
+    </div>
+</div>
+<div *ngIf="showNotVerified==true" style="text-align: center">
+        <app-awaiting-email-verification [model]="{username: model.username, password:model.password}"></app-awaiting-email-verification>
+</div>

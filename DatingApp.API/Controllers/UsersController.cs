@@ -5,9 +5,9 @@ using System.Threading.Tasks;
 using AutoMapper;
 using DatingApp.API.Data;
 using DatingApp.API.Dtos;
+using DatingApp.API.Errors;
 using DatingApp.API.Helpers;
 using DatingApp.API.Models;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace DatingApp.API.Controllers
@@ -27,11 +27,11 @@ namespace DatingApp.API.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetUsers([FromQuery]UserParams userParams)
+        public async Task<IActionResult> GetUsers([FromQuery] UserParams userParams)
         {
             var currentUserId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value);
 
-            var userFromRepo = await _repo.GetUser(currentUserId, false);
+            var userFromRepo = await _repo.GetUser(currentUserId, true);
 
             userParams.UserId = currentUserId;
 
@@ -58,12 +58,13 @@ namespace DatingApp.API.Controllers
 
             return Ok(userToReturn);
         }
+
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateUser(int id, UserForUpdateDto userForUpdateDto)
         {
             if (id != int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value))
             {
-                return Unauthorized();
+                return Unauthorized(new ApiResponse(401));
             }
 
             var userFromRepo = await _repo.GetUser(id, true);
@@ -75,34 +76,81 @@ namespace DatingApp.API.Controllers
 
             throw new Exception($"Updating user {id} failed on save");
         }
-        [HttpPost("{id}/like/{recipientId}")]
-        public async Task<IActionResult> LikeUser(int id, int recipientId)
+
+        [HttpPost("{id}/likeunlike/{recipientId}")]
+        public async Task<IActionResult> LikeOrUnlikeUser(int id, int recipientId)
         {
             if (id != int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value))
             {
-                return Unauthorized();
+                return Unauthorized(new ApiResponse(401));
             }
+
+            if (await _repo.GetUser(recipientId, false) == null)
+                return NotFound(new ApiResponse(404));
 
             var like = await _repo.GetLike(id, recipientId);
 
             if (like != null)
-                return BadRequest("You already like this user");
+            {
+                _repo.Delete(like);
 
-            if (await _repo.GetUser(recipientId, false) == null)
-                return NotFound();
+                if (await _repo.SaveAll())
+                    return Ok(true);
+            }
 
             like = new Like
             {
                 LikerId = id,
-                LikeeId = recipientId
+                LikeeId = recipientId,
             };
 
             _repo.Add<Like>(like);
 
+
             if (await _repo.SaveAll())
+            {
+                return Ok(false);
+
+            }
+
+            return BadRequest(new ApiResponse(400));
+        }
+
+        [HttpPost("{id}/gooffline")]
+        public async Task<IActionResult> GoOffline(int id)
+        {
+            if (id != int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value))
+            {
+                return Unauthorized(new ApiResponse(401));
+            }
+
+            var user = await _repo.GetUser(id, true);
+
+            if (await _repo.GetUser(id, true) == null)
+            {
+                return NotFound();
+            }
+
+            //if (user.IsOnline == true)
+            //{
+            user.IsOnline = false;
+
+            //}
+            //else
+            //{
+            //    return BadRequest(new ApiResponse(400, "User is already offline"));
+            //}
+
+            //var userToReturn = _mapper.Map<UserForLogoutDto>(user);
+
+            if (await _repo.SaveAll())
+            {
                 return Ok();
 
-            return BadRequest("Failed to like user");
+            }
+
+            return BadRequest(new ApiResponse(400));
+
         }
     }
 }

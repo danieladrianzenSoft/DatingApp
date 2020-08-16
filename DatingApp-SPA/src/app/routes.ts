@@ -13,6 +13,11 @@ import { PreventUnsavedChangesGuard } from './_guards/prevent-unsaved-changes.gu
 import { ListsResolver } from './_resolvers/lists.resolver';
 import { MessagesResolver } from './_resolvers/messages.resolver';
 import { AdminPanelComponent } from './admin/admin-panel/admin-panel.component';
+import { LoginComponent } from './login/login.component';
+import { RegisterComponent } from './register/register.component';
+import { ConfirmEmailComponent } from './verify-account/confirm-email/confirm-email';
+import { ConfirmEmailResolver } from './_resolvers/confirm-email.resolver';
+// import { AwaitingEmailVerificationComponent } from './verify-account/awaiting-email-verification/awaiting-email-verification.component';
 
 export const appRoutes: Routes = [
     {path: '', component: HomeComponent},
@@ -28,9 +33,13 @@ export const appRoutes: Routes = [
                 canDeactivate: [PreventUnsavedChangesGuard]},
             {path: 'messages', component: MessagesComponent, resolve: {messages: MessagesResolver}},
             {path: 'lists', component: ListsComponent, resolve: {users: ListsResolver}},
-            {path: 'admin', component: AdminPanelComponent, data: {roles: ['Admin', 'Moderator']}}
+            {path: 'admin', component: AdminPanelComponent, data: {roles: ['Admin', 'Moderator']}},
         ]
     },
-
-    {path: '**', redirectTo: '', pathMatch: 'full'},
+    {path: 'login', component: LoginComponent, data: {navbar: false}},
+    {path: 'register', component: RegisterComponent, data: {navbar: false}},
+    {path: 'confirm-email', pathMatch: 'full', component: ConfirmEmailComponent,
+    resolve: {isVerified: ConfirmEmailResolver}},
+    // {path: 'awaiting-email-verification', component: AwaitingEmailVerificationComponent},
+    {path: '**', redirectTo: '', pathMatch: 'full'}
 ];

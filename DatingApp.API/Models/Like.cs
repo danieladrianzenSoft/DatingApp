@@ -1,4 +1,6 @@
 ﻿using System;
+using DatingApp.API.Dtos;
+
 namespace DatingApp.API.Models
 {
     public class Like
