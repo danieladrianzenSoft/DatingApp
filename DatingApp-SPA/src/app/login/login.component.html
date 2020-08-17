@@ -24,5 +24,5 @@
     </div>
 </div>
 <div *ngIf="showNotVerified==true" style="text-align: center">
-        <app-awaiting-email-verification [model]="{username: model.username, password:model.password}"></app-awaiting-email-verification>
+        <app-awaiting-email-verification [loginInfo]="loginInfo"></app-awaiting-email-verification>
 </div>

@@ -31,6 +31,7 @@ export class RegisterComponent implements OnInit {
   bsConfig: Partial<BsDatepickerConfig>;
   errors: string[];
   registrationCompleted = false;
+  loginInfo: any = {};
 
   constructor(private authService: AuthService, private alertify: AlertifyService,
               private fb: FormBuilder, private router: Router) { }
@@ -72,13 +73,16 @@ export class RegisterComponent implements OnInit {
   // }
 
   register(): any{
+    this.registrationCompleted = true;
     if (this.registerForm.valid) {
       // cloning values from form into an empty object, and assign it to this.user
       // which is of type user.
       this.user = Object.assign({}, this.registerForm.value);
+      this.loginInfo = Object.assign({},
+        {username: this.registerForm.get('username').value,
+        password: this.registerForm.get('password').value});
       this.authService.register(this.user).subscribe(() => {
         this.alertify.success('Registration successful');
-        this.registrationCompleted = true;
       }, error => {
         this.errors = error.errors;
         this.alertify.error(error);

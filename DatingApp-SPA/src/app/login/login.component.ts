@@ -11,9 +11,10 @@ import { UserService } from '../_services/user.service';
 })
 export class LoginComponent implements OnInit {
 
-  model: any = {};
+  model: any = {};
   photoUrl: string;
   showNotVerified = false;
+  loginInfo: any = {};
 
   constructor(public authService: AuthService, private alertify: AlertifyService,
               private router: Router, private userService: UserService) { }
@@ -26,6 +27,7 @@ export class LoginComponent implements OnInit {
   }
 
   login(): any{
+    this.loginInfo = Object.assign({}, {username: this.model.username, password: this.model.password});
     this.authService.login(this.model).subscribe( next => {
       this.alertify.success('Logged in successfully');
       this.authService.unverifiedAccount.next(false);
