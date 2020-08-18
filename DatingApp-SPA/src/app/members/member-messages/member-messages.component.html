@@ -1,18 +1,42 @@
 <div class="card">
-    <div class="card-body">
+    <div class="card-body" id="message-thread" #messageThread [scrollTop]="messageThread.scrollHeight">
         <div *ngIf="messages?.length===0">
             <p>No messages yet... say hi by using the message box below</p>
         </div>
-        <ul class="chat">
+        <div class="row" *ngFor="let message of messages">
+            <div class="col-7 message other-message" *ngIf="message.senderId == recipientId">
+                <b>{{message.senderDisplayName}}</b><br>
+                <span>{{message.content}}</span><br>
+                <div class="messageHeader float-right">
+                    <span class="text-muted"><i class="fa fa-clock-o text-muted"></i> {{message.messageSent | date:'short'}} </span>
+                    <span *ngIf="message.isRead == false" class="text-info"> <i class="fa fa-check-circle-o"></i></span>
+                    <span *ngIf="message.isRead" class="text-info"> <i class="fa fa-check-circle"></i></span>
+                </div>
+            </div>
+            <div class="col-7 offset-5 message user-message" *ngIf="message.senderId != recipientId">
+                <b>{{message.senderDisplayName}}</b><br>
+                <span>{{message.content}}</span><br>
+                <div class="messageHeader float-right">
+                    <span class="text-muted"><i class="fa fa-clock-o text-muted"></i> {{message.messageSent | date:'short'}} </span>
+                    <span *ngIf="message.isRead == false" class="text-info"> <i class="fa fa-check-circle-o"></i></span>
+                    <span *ngIf="message.isRead" class="text-info"> <i class="fa fa-check-circle"></i></span>
+                </div>
+            </div>
+
+
+
+
+
+        <!-- <ul class="chat">
             <li *ngFor="let message of messages">
-                <!-- to them -->
+                to them
                 <div *ngIf="message.senderId == recipientId">
-                    <span class="chat-img float-left">
-                        <img src="{{message.senderPhotoUrl || '../../../../../assets/user.png'}}" alt="{{message.senderKnownAs}}" class="rounded-circle mr-1">
+                    <span class="chat-img float-left imageRecipient">
+                        <img src="{{message.senderPhotoUrl || '../../../../../assets/user.png'}}" alt="{{message.senderDisplayName}}" class="rounded-circle mr-1">
                     </span>
-                    <div class="chat-body">
+                    <div class="chat-body chatRecipient">
                         <div class="header">
-                            <strong class="primary-font">{{message.senderKnownAs}}</strong>
+                            <strong class="primary-font">{{message.senderDisplayName}}</strong>
                             <small class="text-muted float-right">
                                 <span class="fa fa-clock-o"> {{message.messageSent | timeago}}</span>
                             </small>
@@ -20,40 +44,43 @@
                         <p>{{message.content}}</p>
                     </div>
                 </div>
-                <!-- to me -->
+                to me
                 <div *ngIf="message.senderId != recipientId">
-                    <span class="chat-img float-right">
-                        <img src="{{message.senderPhotoUrl || '../../../../../assets/user.png'}}" alt="{{message.senderKnownAs}}" class="rounded-circle ml-1">
+                    <span class="chat-img float-right imageSender">
+                        <img src="{{message.senderPhotoUrl || '../../../../../assets/user.png'}}" alt="{{message.senderDisplayName}}" class="rounded-circle ml-1">
                     </span>
-                    <div class="chat-body">
+                    <div class="chat-body chatSender">
                         <div class="header">
-                            <small class="text-muted">
+                            <small class="text-muted float-right">
                                 <span class="fa fa-clock-o"> {{message.messageSent | timeago}}</span>
                                 <span *ngIf="message.isRead == false" class="text-danger"> (unread)</span>
                                 <span *ngIf="message.isRead" class="text-muted"> (Read {{message.dateRead | timeago}})</span>
+                                <span *ngIf="message.isRead" class="text-muted"> (Read)</span>
 
                             </small>
-                            <strong class="primary-font float-right">{{message.senderKnownAs}}</strong>
+                            <strong class="primary-font float-right">{{message.senderDisplayName}}</strong>
                         </div>
                         <p>{{message.content}}</p>
                     </div>
                 </div>
             </li>
-        </ul>
-
+        </ul> -->
+        </div>
     </div>
     <div class="card-footer">
         <form #messageForm="ngForm" (ngSubmit)="messageForm.valid && sendMessage()">
             <div class="input-group">
-                <input 
+                <textarea 
+                    rows="1"
+                    autosize maxRows="3"
                     type="text" 
                     [(ngModel)]="newMessage.content"
                     name="content"
                     required
-                    class="form-control input-sm" 
-                    placeholder="Send a private message"/>
+                    class="form-control input-sm text-area" 
+                    placeholder="Send a private message"></textarea>
                 <div class="input-group-append">
-                    <button class="btn btn-primary" [disabled]="messageForm.valid==false">Send</button>
+                    <button class="btn btn-info" [disabled]="messageForm.valid==false"><i class="fa fa-paper-plane"></i></button>
                 </div>
             </div>
         </form>

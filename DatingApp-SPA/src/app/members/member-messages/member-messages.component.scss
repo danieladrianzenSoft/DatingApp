@@ -1,21 +1,48 @@
 .card{
     border: none;
 }
-.chat{
-    list-style: none;
-    margin: 0;
-    padding: 0;
+.messageHeader{
+    font-size: x-small;
 }
-.chat li {
-    margin-bottom: 10px;
-    padding-bottom: 10px;
-    border-bottom: 1px dotted #B3A9A9;
+.message{
+    padding: 10px;
+    border-radius: 10px;
+    margin-bottom: 4px;
+    white-space: pre-wrap;
 }
-.rounded-circle {
-    height: 50px;
-    width: 50px;
+.other-message{
+    background: rgb(224, 248, 252);
+}
+.user-message{
+    background: rgb(243, 246, 249);
+    offset: 4;
+}
+textarea{
+    resize: none;
+    border-radius: 10px;
+    padding-left: 10px;
+    padding-right: 10px;
 }
 .card-body{
+    height: 590px;
     overflow-y: scroll;
-    height: 400px;
 }
+
+// .chat{
+//     list-style: none;
+//     margin: 0;
+//     padding: 0;
+// }
+// .chat li {
+//     margin-bottom: 10px;
+//     padding-bottom: 10px;
+//     // border-bottom: 1px dotted #B3A9A9;
+// }
+// .rounded-circle {
+//     height: 50px;
+//     width: 50px;
+// }
+// .card-body{
+//     overflow-y: scroll;
+//     height: 400px;
+// }

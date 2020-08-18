@@ -1,4 +1,4 @@
-import { Component, OnInit, Input } from '@angular/core';
+import { Component, OnInit, Input, ViewChild } from '@angular/core';
 import { Message } from 'src/app/_models/message';
 import { UserService } from 'src/app/_services/user.service';
 import { AuthService } from 'src/app/_services/auth.service';
@@ -14,13 +14,17 @@ export class MemberMessagesComponent implements OnInit {
   @Input() recipientId: number;
   messages: Message[];
   newMessage: any = {};
+  chat: any;
 
   constructor(private userService: UserService,
               private authService: AuthService,
-              private alertify: AlertifyService) { }
+              private alertify: AlertifyService)
+              {}
 
   ngOnInit(): void {
     this.loadMessages();
+    // this.chat = document.getElementById('message-thread');
+    // this.chat.nativeElement.scrollTop = this.chat.nativeElement.scrollHeight;
   }
 
   loadMessages(): any{
@@ -42,6 +46,7 @@ export class MemberMessagesComponent implements OnInit {
       )
       .subscribe(messages => {
         this.messages = messages;
+        // this.chat.nativeElement.scrollTop = this.chat.nativeElement.scrollHeight;
       }, error => {
         this.alertify.error(error);
       });
@@ -54,9 +59,10 @@ export class MemberMessagesComponent implements OnInit {
       .subscribe(
         (message: Message) => {
           // we want to add the message to the start, not the end, so we can use unshift.
-          this.messages.unshift(message);
+          this.messages.push(message);
           this.newMessage.content = '';
-      }, error => {
+          // this.chat.nativeElement.scrollTop = this.chat.nativeElement.scrollHeight;
+        }, error => {
         this.alertify.error(error);
       });
   }

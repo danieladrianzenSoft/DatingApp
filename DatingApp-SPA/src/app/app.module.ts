@@ -13,6 +13,7 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { HttpClientModule } from '@angular/common/http';
 import { CollapseModule } from 'ngx-bootstrap/collapse';
 import { ModalModule } from 'ngx-bootstrap/modal';
+import { AutosizeModule } from 'ngx-autosize';
 
 import { AppComponent } from './app.component';
 import { NavComponent } from './nav/nav.component';
@@ -104,6 +105,7 @@ export class MyHammerConfig extends HammerGestureConfig  {
       NgxGalleryModule,
       FileUploadModule,
       HammerModule,
+      AutosizeModule,
       JwtModule.forRoot({
          config: {
             tokenGetter,
