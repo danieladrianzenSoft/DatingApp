@@ -15,12 +15,83 @@ input[type=file]{
 .not-approved {
     opacity: 0.3;
 }
+.is-main-approved {
+    border: solid;
+    border-width: 1;
+    border-color: rgb(200, 200, 200);
+}
 
-.img.wrapper{
+.card-img-wrapper{
     position: relative;
+    width: 100%;
+    // text-align: center;
+    // justify-items: center;
+    // align-content: center;
 }
 
 .img-text{
     position: absolute;
-    bottom: 30%;
+    margin-top: -80%;
+}
+.card-img-wrapper{
+    overflow: hidden;
+    position: relative;
+    // outline: none;
+}
+.card-body{
+    padding: 0;
+    border: none;
+}
+.card-photos{
+    position: relative;
+}
+.card-photos:hover #deleteButton{
+    opacity: 1;
+}
+
+.card-photos:hover #deleteButton:disabled{
+    opacity: 0;
+}
+.img-thumbnail{
+    border: none;
+}
+.card-photos:hover .img-thumbnail{
+    // border: none;
+    border: dotted;
+    border-width: 1;
+    border-color: rgb(200, 200, 200);
+}
+.delete-image-container{
+    position: absolute;
+    margin-top: -110%;
+    margin-left: 75%;
+    opacity: 1;
+
+}
+// .button-container{
+//     width: 100%;
+//     text-align: center;
+// }
+.btn-transparent{
+    position: absolute;
+    background: white;
+    width: 29px;
+    height: 29px;
+    border-radius: 50%;   
+    text-align: center;
+    line-height: 28px;
+    vertical-align: middle;
+    padding: 0;
+    font-size: x-large;
+    color: rgb(119, 118, 118);
+    position: relative;
+    opacity: 0;
+    // cursor: pointer;
+}
+.btn-transparent:disabled{
+    opacity: 0;
+}
+#mainPhotoLabel{
+    // background: rgb(108, 182, 108);
+    color: white;
 }

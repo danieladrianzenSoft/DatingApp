@@ -15,6 +15,7 @@ export class AuthService {
   jwtHelper = new JwtHelperService();
   decodedToken: any;
   currentUser: User;
+  currentToken: string;
   unverifiedAccount = new BehaviorSubject<boolean>(false);
   photoUrl = new BehaviorSubject<string>('../../assets/user.png');
   currentPhotoUrl = this.photoUrl.asObservable();
@@ -34,6 +35,7 @@ export class AuthService {
           const user = response; // user here will be containing token object.
           if (user) {
             // if (user.isVerified === true) {
+              this.currentToken = user.token;
               localStorage.setItem('token', user.token);
               localStorage.setItem('user', JSON.stringify(user.user));
               this.decodedToken = this.jwtHelper.decodeToken(user.token);

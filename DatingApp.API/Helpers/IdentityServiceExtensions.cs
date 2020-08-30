@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Text;
+using System.Threading.Tasks;
 using DatingApp.API.Data;
 using DatingApp.API.Models;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -42,6 +43,20 @@ namespace DatingApp.API.Helpers
                         ValidIssuer = config["Token:Issuer"],
                         ValidateIssuer = true,
                         ValidateAudience = false
+                    };
+                    options.Events = new JwtBearerEvents
+                    {
+                        OnMessageReceived = context =>
+                        {
+                            var accessToken = context.Request.Query["access_token"];
+                            var path = context.HttpContext.Request.Path;
+                            if (string.IsNullOrEmpty(accessToken) == false && path.StartsWithSegments("/api/chat"))
+                            {
+                                context.Token = accessToken;
+                            }
+
+                            return Task.CompletedTask;
+                        }
                     };
                 });
 

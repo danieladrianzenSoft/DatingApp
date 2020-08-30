@@ -5,6 +5,8 @@ import { Router, ActivatedRoute, NavigationEnd } from '@angular/router';
 import { UserService } from '../_services/user.service';
 import { HttpErrorResponse } from '@angular/common/http';
 import { map, mergeMap, filter } from 'rxjs/operators';
+import { ChatService } from '../_services/chat.service';
+import { Message } from '@angular/compiler/src/i18n/i18n_ast';
 
 @Component({
   selector: 'app-nav',
@@ -16,13 +18,16 @@ export class NavComponent implements OnInit {
   photoUrl: string;
   isCollapsed = true;
   visible: boolean;
+  newMessageNotification: boolean;
+  // messageContainer = 'Unread';
+  numberMessagesUnread: number;
 
   // isLoginButtonVisible = true;
   // isRegisterButtonVisible = true;
 
   constructor(public authService: AuthService, private alertify: AlertifyService,
               private router: Router, private userService: UserService,
-              private activatedRoute: ActivatedRoute) { this.visible = true; }
+              private activatedRoute: ActivatedRoute, private chat: ChatService) { this.visible = true; }
 
   ngOnInit(): void {
     this.authService.currentPhotoUrl.subscribe(photoUrl => this.photoUrl = photoUrl);
@@ -44,6 +49,19 @@ export class NavComponent implements OnInit {
     .subscribe(event => {
       this.showNavbar(event.navbar); // show the toolbar?
     });
+    if (this.loggedIn()){
+      this.chat.createHubConnection(this.authService.decodedToken.nameid);
+      // this.chat.startConnection(this.authService.decodedToken.nameid);
+      this.chat.newMessagesCounterUpdate.subscribe((newMessageCounter: number) => {
+        // console.log(newMessageCounter);
+        if (newMessageCounter > 0){
+          this.newMessageNotification = true;
+        }
+        else{
+          this.newMessageNotification = false;
+        }
+      });
+    }
   }
 
   showNavbar(event): any {
@@ -75,14 +93,33 @@ export class NavComponent implements OnInit {
   }
 
   goOffline(): any{
-    this.userService.goOffline(this.authService.decodedToken.nameid).subscribe();
+    this.userService.goOffline(this.authService.decodedToken.nameid).subscribe(() => {
+      // this.alertify.success('Offline');
+    }, error => {
+      console.log(error);
+    });
+    this.chat.stopHubConnection(this.authService.decodedToken.nameid);
+    // this.chat.isConnected$.asObservable().subscribe( isConnected => {
+    //   if (isConnected === true){
+    //     this.chat.stopHubConnection(this.authService.decodedToken.nameid);
+    //     this.chat.isConnected$.next(false);
+    //   }
+    // });
+    // this.chat.getIsConnected().subscribe((isConnected) => {
+    //    if (isConnected === true){
+    //     this.chat.stopHubConnection(this.authService.decodedToken.nameid);
+    //     this.chat.isConnected$.next(false);
+    //    }
+
+    // });
   }
 
   logOut(): any{
     this.isCollapsed = true;
     // this.isLoginButtonVisible = true;
     // this.isRegisterButtonVisible = true;
-    this.userService.goOffline(this.authService.decodedToken.nameid);
+    // this.userService.goOffline(this.authService.decodedToken.nameid);
+    this.goOffline();
     localStorage.removeItem('token');
     localStorage.removeItem('user');
     this.authService.decodedToken = null;

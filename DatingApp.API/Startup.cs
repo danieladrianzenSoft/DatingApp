@@ -6,6 +6,7 @@ using DatingApp.API.Data;
 using DatingApp.API.Errors;
 using DatingApp.API.Helpers;
 using DatingApp.API.Models;
+using DatingApp.API.SignalR;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
@@ -56,6 +57,11 @@ namespace DatingApp.API
             services.AddDbContext<DataContext>(x =>
                 x.UseSqlite(Configuration.GetConnectionString("DefaultConnection")));
 
+            services.AddSignalR(options =>
+            {
+                options.EnableDetailedErrors = true;
+            });
+
             services.AddControllers(options =>
             {   // By default: every user will have to authenticate every single method. We will
                 // add exceptions later for the registration and login methods.
@@ -105,9 +111,10 @@ namespace DatingApp.API
             {
                 opt.AddPolicy("CorsPolicy", policy =>
                 {
-                    policy.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader();
+                    policy.AllowAnyHeader().AllowAnyMethod().AllowCredentials().WithOrigins("http://localhost:4200");
                 });
             });
+
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -155,6 +162,7 @@ namespace DatingApp.API
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
+                endpoints.MapHub<ChatHub>("api/chat");
             });
         }
     }

@@ -8,9 +8,17 @@
             </div>
     </div>
 
-    <img class="online" *ngIf="user.isOnline==true" src="../../../../../assets/online.png">
+
+    <!-- <img class="online" *ngIf="user.isOnline==true" src="../../../../../assets/online.png"> -->
+    
+    <!-- <div class="container" id="online-circle-container"> -->
+    <!-- </div> -->
+
 
     <div class="card-body p-1">
+
+        <div class="online fa-fa-circle" *ngIf="user.isOnline==true"></div>
+
         <h6 class="card-title text-center mb-1">
             {{user.displayName}}, {{user.age}}
         </h6>

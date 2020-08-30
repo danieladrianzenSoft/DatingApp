@@ -5,6 +5,7 @@ import { UserService } from '../_services/user.service';
 import { AuthService } from '../_services/auth.service';
 import { ActivatedRoute } from '@angular/router';
 import { AlertifyService } from '../_services/alertify.service';
+import { User } from '../_models/user';
 
 @Component({
   selector: 'app-messages',
@@ -13,26 +14,44 @@ import { AlertifyService } from '../_services/alertify.service';
 })
 export class MessagesComponent implements OnInit {
   messages: Message[];
-  pagination: Pagination;
-  messageContainer: 'Unread';
+  userId: number;
+  numberUnread: number;
+  // pagination: Pagination;
+  // messageContainer: 'Inbox';
 
   constructor(private userService: UserService, private authService: AuthService,
               private route: ActivatedRoute, private alertify: AlertifyService) { }
 
   ngOnInit(): void {
+    const currentUserId = +this.authService.decodedToken.nameid;
+    this.userId = currentUserId;
+
     this.route.data.subscribe(data => {
-      this.messages = data.messages.result;
-      this.pagination = data.messages.pagination;
+      this.messages = data.messages.messages;
+      this.numberUnread = data.messages.numberUnread;
+      // this.pagination = data.messages.pagination;
     });
+
   }
 
+  // loadMessages(): any{
+  //   this.userService.getMessages(this.authService.decodedToken.nameid,
+  //     this.pagination.currentPage, this.pagination.itemsPerPage,
+  //     this.messageContainer)
+  //     .subscribe((res: PaginatedResult<Message[]>) => {
+  //       this.messages = res.result;
+  //       this.pagination = res.pagination;
+  //     }, error => {
+  //       this.alertify.error(error);
+  //     });
+  // }
+
+
   loadMessages(): any{
-    this.userService.getMessages(this.authService.decodedToken.nameid,
-      this.pagination.currentPage, this.pagination.itemsPerPage,
-      this.messageContainer)
-      .subscribe((res: PaginatedResult<Message[]>) => {
-        this.messages = res.result;
-        this.pagination = res.pagination;
+    this.userService.getMessages(this.userId)
+      // this.messageContainer)
+      .subscribe((res: Message[]) => {
+        this.messages = res;
       }, error => {
         this.alertify.error(error);
       });
@@ -51,7 +70,7 @@ export class MessagesComponent implements OnInit {
   }
 
   pageChanged(event: any): void{
-    this.pagination.currentPage = event.page;
+    // this.pagination.currentPage = event.page;
     this.loadMessages();
   }
 

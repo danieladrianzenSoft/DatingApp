@@ -30,5 +30,6 @@ namespace DatingApp.API.Helpers
 
             return new PagedList<T>(items, count, pageNumber, pageSize);
         }
+
     }
 }

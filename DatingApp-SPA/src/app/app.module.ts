@@ -52,6 +52,7 @@ import { ConfirmEmailComponent } from './verify-account/confirm-email/confirm-em
 import { ConfirmEmailResolver } from './_resolvers/confirm-email.resolver';
 import { AwaitingEmailVerificationComponent } from './verify-account/awaiting-email-verification/awaiting-email-verification.component';
 import { TextInputComponent } from './shared/text-input/text-input.component';
+import { ChatService } from './_services/chat.service';
 
 export function tokenGetter(): any {
    return localStorage.getItem('token');
@@ -120,6 +121,7 @@ export class MyHammerConfig extends HammerGestureConfig  {
       AuthGuard,
       UserService,
       AdminService,
+      ChatService,
       MemberDetailResolver,
       MemberListResolver,
       MemberEditResolver,

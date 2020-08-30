@@ -21,6 +21,7 @@ namespace DatingApp.API.Controllers
 {
     [Route("api/users/{userId}/photos")]
     [ApiController]
+    [Authorize]
     public class PhotosController : ControllerBase
     {
         private readonly IDatingRepository _repo;
@@ -143,7 +144,8 @@ namespace DatingApp.API.Controllers
             // now we check if the photo selected is already the main photo.
             if (photoFromRepo.IsMain)
             {
-                return BadRequest(new ApiResponse(400, "This is already the main photo"));
+                return NoContent();
+                //return BadRequest(new ApiResponse(400, "This is already the main photo"));
             }
 
             // and we check if it has been approved or not.

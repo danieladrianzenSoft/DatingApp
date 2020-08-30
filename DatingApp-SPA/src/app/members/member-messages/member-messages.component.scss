@@ -23,9 +23,14 @@ textarea{
     padding-left: 10px;
     padding-right: 10px;
 }
-.card-body{
-    height: 590px;
+// .card-body{
+//     overflow-y: scroll;
+// }
+#message-thread{
+    height: 75vh;
     overflow-y: scroll;
+    padding: 1 1 1 1;
+    width: 100%;
 }
 
 // .chat{

@@ -1,27 +1,50 @@
 <div class="card">
-    <div class="card-body" id="message-thread" #messageThread [scrollTop]="messageThread.scrollHeight">
+    <div class="card-body" id="message-thread" #messageThread>
         <div *ngIf="messages?.length===0">
             <p>No messages yet... say hi by using the message box below</p>
         </div>
-        <div class="row" *ngFor="let message of messages">
-            <div class="col-7 message other-message" *ngIf="message.senderId == recipientId">
-                <b>{{message.senderDisplayName}}</b><br>
-                <span>{{message.content}}</span><br>
-                <div class="messageHeader float-right">
-                    <span class="text-muted"><i class="fa fa-clock-o text-muted"></i> {{message.messageSent | date:'short'}} </span>
-                    <span *ngIf="message.isRead == false" class="text-info"> <i class="fa fa-check-circle-o"></i></span>
-                    <span *ngIf="message.isRead" class="text-info"> <i class="fa fa-check-circle"></i></span>
+        <div>
+            <div class="row" *ngFor="let message of messages">
+                <div class="col-7 message other-message" *ngIf="message.senderId == recipientId">
+                    <b>{{message.senderDisplayName}}</b><br>
+                    <span>{{message.content}}</span><br>
+                    <div class="messageHeader float-right">
+                        <span class="text-muted"><i class="fa fa-clock-o text-muted"></i>
+                            {{message.messageSent | date:'short'}}
+                        </span>
+                        <!-- <span *ngIf="message.isRead == false" class="text-info"> <i class="fa fa-check-circle-o"></i></span>
+                        <span *ngIf="message.isRead" class="text-info"> <i class="fa fa-check-circle"></i></span> -->
+                    </div>
+                </div>
+                <div class="col-7 offset-5 message user-message" *ngIf="message.senderId != recipientId">
+                    <b>{{message.senderDisplayName}}</b><br>
+                    <span>{{message.content}}</span><br>
+                    <div class="messageHeader float-right">
+                        <span class="text-muted"><i class="fa fa-clock-o text-muted"></i>
+                            {{message.messageSent | date:'short'}}
+                        </span>
+                        <span *ngIf="message.isRead == false" class="text-info"> <i class="fa fa-check-circle-o"></i></span>
+                        <span *ngIf="message.isRead" class="text-info"> <i class="fa fa-check-circle"></i></span>
+                    </div>
                 </div>
             </div>
-            <div class="col-7 offset-5 message user-message" *ngIf="message.senderId != recipientId">
-                <b>{{message.senderDisplayName}}</b><br>
-                <span>{{message.content}}</span><br>
-                <div class="messageHeader float-right">
-                    <span class="text-muted"><i class="fa fa-clock-o text-muted"></i> {{message.messageSent | date:'short'}} </span>
-                    <span *ngIf="message.isRead == false" class="text-info"> <i class="fa fa-check-circle-o"></i></span>
-                    <span *ngIf="message.isRead" class="text-info"> <i class="fa fa-check-circle"></i></span>
+        </div>
+        </div>
+        
+    <div class="card-footer">
+        <form #messageForm="ngForm" (ngSubmit)="messageForm.valid && sendMessage()">
+            <div class="input-group">
+                <textarea rows="1" autosize maxRows="3" type="text" [(ngModel)]="newMessageToSend.content" name="content"
+                    required class="form-control input-sm text-area" placeholder="Send a private message"></textarea>
+                <div class="input-group-append">
+                    <button class="btn btn-info" [disabled]="messageForm.valid==false"><i
+                            class="fa fa-paper-plane"></i></button>
                 </div>
             </div>
+        </form>
+    </div>
+</div>
+
 
 
 
@@ -65,24 +88,3 @@
                 </div>
             </li>
         </ul> -->
-        </div>
-    </div>
-    <div class="card-footer">
-        <form #messageForm="ngForm" (ngSubmit)="messageForm.valid && sendMessage()">
-            <div class="input-group">
-                <textarea 
-                    rows="1"
-                    autosize maxRows="3"
-                    type="text" 
-                    [(ngModel)]="newMessage.content"
-                    name="content"
-                    required
-                    class="form-control input-sm text-area" 
-                    placeholder="Send a private message"></textarea>
-                <div class="input-group-append">
-                    <button class="btn btn-info" [disabled]="messageForm.valid==false"><i class="fa fa-paper-plane"></i></button>
-                </div>
-            </div>
-        </form>
-    </div>
-</div>

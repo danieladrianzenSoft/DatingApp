@@ -1,9 +1,9 @@
 ﻿using System;
 namespace DatingApp.API.Dtos
 {
-    public class UserForLogoutDto
+    public class UserForChatDto
     {
         public string Username { get; set; }
-        public bool IsOnline { get; set; }
+        public string ConnectionId { get; set; }
     }
 }

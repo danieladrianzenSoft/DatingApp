@@ -11,6 +11,9 @@
             aria-label="Toggle navigation"
             (click)="isCollapsed = !isCollapsed">
             <span class="navbar-toggler-icon"></span>
+            <div class="notification-container justify-content-center" *ngIf="newMessageNotification == true">
+                <div class="notification-hamburger fa-fa-circle btn-info"></div>
+            </div>
         </button>
 
         <div class="collapse navbar-collapse" id="navbarDropdown" [collapse]="isCollapsed">
@@ -22,7 +25,21 @@
                     <a class="nav-link" [routerLink]="['/lists']">Lists</a>
                 </li>
                 <li class="nav-item" routerLinkActive="active" (click)="isCollapsed = true">
-                    <a class="nav-link" [routerLink]="['/messages']">Messages</a>
+                    <a class="nav-link" [routerLink]="['/messages']">Messages
+                    <div *ngIf="isCollapsed === false && newMessageNotification === true" class="badge badge-pill badge-info">
+                        New
+                    </div>
+                    </a>
+                        <!-- <span class="fa-stack fa-2x" style="padding-left:0px; display:inline-block" *ngIf="isCollapsed === false && newMessageNotification === true">
+                            <i class="fa fa-circle fa-stack-1x" style="font-size: 0.48em; color:white; padding:0; vertical-align: middle;"></i>
+                            <i class="fa fa-circle fa-stack-1x text-info" style="font-size: 0.39em; padding:0; vertical-align: middle;"></i>
+                          </span> -->
+                        <!-- <i *ngIf="isCollapsed === false && newMessageNotification === true"
+                            class="notification-collapsed fa fa-circle text-info circle-icon">
+                        </i> -->
+                    <div class="notification-container justify-content-center" *ngIf="newMessageNotification == true">
+                        <div *ngIf="isCollapsed === true" class="notification-expanded btn-info"></div>
+                    </div>
                 </li>
                 <li *appHasRole="['Admin','Moderator']" class="nav-item" (click)="isCollapsed = true" routerLinkActive="active">
                     <a class="nav-link" [routerLink]="['/admin']">Admin</a>

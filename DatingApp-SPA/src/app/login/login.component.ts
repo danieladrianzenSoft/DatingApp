@@ -3,6 +3,7 @@ import { AuthService } from '../_services/auth.service';
 import { AlertifyService } from '../_services/alertify.service';
 import { Router } from '@angular/router';
 import { UserService } from '../_services/user.service';
+import { ChatService } from '../_services/chat.service';
 
 @Component({
   selector: 'app-login',
@@ -10,14 +11,15 @@ import { UserService } from '../_services/user.service';
   styleUrls: ['./login.component.scss']
 })
 export class LoginComponent implements OnInit {
-
   model: any = {};
   photoUrl: string;
   showNotVerified = false;
   loginInfo: any = {};
+  numberMessagesUnread: any = {};
 
   constructor(public authService: AuthService, private alertify: AlertifyService,
-              private router: Router, private userService: UserService) { }
+              private router: Router, private userService: UserService,
+              private chat: ChatService) { }
 
   ngOnInit(): void {
     this.authService.currentPhotoUrl.subscribe(photoUrl => this.photoUrl = photoUrl);
@@ -35,6 +37,12 @@ export class LoginComponent implements OnInit {
       this.alertify.error(error);
     }, () => {
       this.router.navigate(['/members']);
+      this.userService.getMessages(this.authService.decodedToken.nameid)
+      .subscribe(data => {
+        this.chat.createHubConnection(this.authService.decodedToken.nameid);
+        // this.chat.startConnection(this.authService.decodedToken.nameid);
+        this.chat.setInitialNewMessagesCounter(data.numberUnread);
+      });
     });
     // login method returns an observable, and we always need to subscribe
     // to observables.
@@ -46,19 +54,19 @@ export class LoginComponent implements OnInit {
     // return true, otherwise return false.
   }
 
-  goOffline(): any{
-    this.userService.goOffline(this.authService.decodedToken.nameid).subscribe();
-  }
+  // goOffline(): any{
+  //   this.userService.goOffline(this.authService.decodedToken.nameid).subscribe();
+  // }
 
-  logOut(): any{
-    this.userService.goOffline(this.authService.decodedToken.nameid);
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
-    this.authService.decodedToken = null;
-    this.authService.currentUser = null;
-    this.alertify.message('logged out');
-    this.router.navigate(['/home']);
-  }
+  // logOut(): any{
+  //   this.userService.goOffline(this.authService.decodedToken.nameid);
+  //   localStorage.removeItem('token');
+  //   localStorage.removeItem('user');
+  //   this.authService.decodedToken = null;
+  //   this.authService.currentUser = null;
+  //   this.alertify.message('logged out');
+  //   this.router.navigate(['/home']);
+  // }
 
 
 }

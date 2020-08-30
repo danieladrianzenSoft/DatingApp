@@ -7,12 +7,14 @@ import { Observable } from 'rxjs';
 import { PaginatedResult } from '../_models/Pagination';
 import { map } from 'rxjs/operators';
 import { Message } from '../_models/message';
+import { HubConnection, HubConnectionBuilder } from '@microsoft/signalr';
 
 @Injectable({
   providedIn: 'root'
 })
 export class UserService {
   baseUrl = environment.apiUrl;
+  hubConnection: HubConnection | null = null;
 
   constructor(private http: HttpClient) { }
 
@@ -72,30 +74,38 @@ export class UserService {
     return this.http.post(this.baseUrl + 'users/' + id + '/likeunlike/' + recipientId, {});
   }
 
-  getMessages(id: number, page?, itemsPerPage?, messageContainer?): any{
-    const paginatedResult: PaginatedResult<Message[]> = new PaginatedResult<Message[]>();
-    let params = new HttpParams();
+  // getMessages(id: number, page?, itemsPerPage?, messageContainer?): any{
+  //   const paginatedResult: PaginatedResult<Message[]> = new PaginatedResult<Message[]>();
+  //   let params = new HttpParams();
 
-    params = params.append('MessageContainer', messageContainer);
+  //   params = params.append('MessageContainer', messageContainer);
 
-    if (page != null && itemsPerPage != null){
-      params = params.append('pageNumber', page);
-      params = params.append('pageSize', itemsPerPage);
-    }
+  //   if (page != null && itemsPerPage != null){
+  //     params = params.append('pageNumber', page);
+  //     params = params.append('pageSize', itemsPerPage);
+  //   }
 
-    return this.http.get<Message[]>(this.baseUrl + 'users/' + id + '/messages',
-      {observe: 'response', params})
-      .pipe(
-        map(response => {
-          paginatedResult.result = response.body;
-          if (response.headers.get('Pagination') !== null) {
-            paginatedResult.pagination = JSON.parse(response.headers.get('Pagination'));
-          }
+  //   return this.http.get<Message[]>(this.baseUrl + 'users/' + id + '/messages',
+  //     {observe: 'response', params})
+  //     .pipe(
+  //       map(response => {
+  //         paginatedResult.result = response.body;
+  //         if (response.headers.get('Pagination') !== null) {
+  //           paginatedResult.pagination = JSON.parse(response.headers.get('Pagination'));
+  //         }
 
-          return paginatedResult;
-        })
-      );
-    }
+  //         return paginatedResult;
+  //       })
+  //     );
+  // }
+
+  getMessages(id: number, messageContainer?): any{
+    // let params = new HttpParams();
+
+    // params = params.append('MessageContainer', messageContainer);
+
+    return this.http.get<Message[]>(this.baseUrl + 'users/' + id + '/messages');
+  }
 
   getMessageThread(id: number, recipientId: number): any{
     return this.http.get<Message[]>(this.baseUrl + 'users/' + id + '/messages/thread/' + recipientId);
@@ -115,6 +125,24 @@ export class UserService {
   }
 
   goOffline(userId: number): any{
-    return this.http.post(this.baseUrl + 'users/' + userId + '/gooffline', {}).subscribe();
+    return this.http.post(this.baseUrl + 'users/' + userId + '/gooffline', {});
   }
+
+  // createHubConnection(currentUserId: string): void{
+  //   this.hubConnection = new HubConnectionBuilder()
+  //     .withUrl('http://localhost:5000/chat', {
+  //       accessTokenFactory: () => currentUserId
+  //     })
+  //     .build();
+
+  //   this.hubConnection
+  //       .start()
+  //       .then(() => console.log(this.hubConnection.state))
+  //       .catch(error => console.log('Error establishing connection: ', error));
+  // }
+
+  // stopHubConnection(): void{
+  //   this.hubConnection.stop();
+  // }
+
 }

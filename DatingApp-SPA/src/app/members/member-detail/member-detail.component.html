@@ -3,7 +3,7 @@
         <div class="col-sm-4">
             <h1>{{user.displayName}}'s Profile</h1>
             <div class="card">
-                <img class="card-img-top img-thumbnail" src="{{user.photoUrl || '../../../../../assets/user.png'}}" alt="{{user.displayName}}">
+                <img class="card-img-top img-thumbnail text-center" src="{{user.photoUrl || '../../../../../assets/user.png'}}" alt="{{user.displayName}}">
                 <!--<img class="online" *ngIf="loggedIn()" src="../../../../../assets/online.png" alt="online">-->
                 <div class="card-body">
                     <div>
@@ -35,20 +35,20 @@
             <div class="tab-panel">
                 <tabset class="member-tabset" #memberTabs>
                     <tab heading="About {{user.displayName}}">
-                        <h4>Description</h4>
+                        <h4 class="mt-1">Description</h4>
                         <p>{{user.introduction || user.displayName + " has not added a description yet"}}</p>
                         <h4>Looking For</h4>
                         <p>{{user.lookingFor || user.displayName + " has not add any preferences"}}</p>
                     </tab>
                     <tab heading="Interests">
-                        <h4>Interests</h4>
+                        <h4 class="mt-1">Interests</h4>
                         <p>{{user.interests || user.displayName + " has not added any interests yet"}}</p>
                     </tab>
                     <tab heading="Photos">
                         <ngx-gallery [options]="galleryOptions" [images]="galleryImages"></ngx-gallery>
                     </tab>
                     <tab heading="Messages">
-                        <app-member-messages [recipientId]="user.id"></app-member-messages>
+                        <app-member-messages [recipient]="user"></app-member-messages>
                     </tab>
                 </tabset>
             </div>

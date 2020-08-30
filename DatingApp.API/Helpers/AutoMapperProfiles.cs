@@ -22,7 +22,7 @@ namespace DatingApp.API.Helpers
                     s.DateOfBirth.CalculateAge()));
             CreateMap<Photo, PhotosForDetailedDto>();
             CreateMap<UserForUpdateDto, User>();
-            CreateMap<User, UserForLogoutDto>();
+            //CreateMap<User, UserForLogoutDto>();
             CreateMap<Photo, PhotoForReturnDto>();
             CreateMap<Like, LikeToReturnDto>();
             CreateMap<PhotoForCreationDto, Photo>();
@@ -32,7 +32,11 @@ namespace DatingApp.API.Helpers
                 .ForMember(d => d.SenderPhotoUrl, o => o.MapFrom(s =>
                     s.Sender.Photos.FirstOrDefault(p => p.IsMain).Url))
                 .ForMember(d => d.RecipientPhotoUrl, o => o.MapFrom(s =>
-                    s.Recipient.Photos.FirstOrDefault(p => p.IsMain).Url));
+                    s.Recipient.Photos.FirstOrDefault(p => p.IsMain).Url))
+                .ForMember(d => d.SenderDisplayName, o => o.MapFrom(s =>
+                    s.Sender.DisplayName))
+                .ForMember(d => d.RecipientDisplayName, o => o.MapFrom(s =>
+                    s.Recipient.DisplayName));
 
         }
     }

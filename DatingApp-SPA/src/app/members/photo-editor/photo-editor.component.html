@@ -1,26 +1,58 @@
 <div class="row">
-    <div class="col-sm-2 img-wrapper" *ngFor="let photo of photos">
-        <img src="{{photo.url}}" class="img-thumbnail p-1" alt=""
-            [ngClass]="photo.isApproved==false && 'not-approved'">
-
-            <div class="text-center img-text" *ngIf="photo.isApproved==false">
-                <span class="text-danger">Awaiting Approval</span>
+    <div *ngFor="let photo of photos" class="ml-2">
+        <div class="card-photos ml-2">
+            <div class="card-img-wrapper text-center" (click)="setMainPhoto(photo)" style="cursor: pointer">
+                <!-- <div class="justify-content-left align-items-center"> -->
+                    <img src="{{photo.url}}" class="img-thumbnail" alt=""
+                        [ngClass]="{'not-approved': photo.isApproved === false, 'is-main-approved': photo.isApproved === true && photo.isMain === true }">
+                    <div class="img-text" *ngIf="photo.isApproved==false">
+                        <span class="text-danger">Awaiting Approval</span>
+                    </div>
             </div>
+            <div class="delete-image-container">
+                <button type="button" class="btn btn-sm btn-transparent" id="deleteButton"
+                    (click)="deletePhoto(photo.id)"
+                    [disabled]="photo.isMain"><i class="fa fa-times-circle"></i>
+                </button>
+            </div>
+            <div  *ngIf="photo.isMain" class="card-body text-center mb-2" id="mainPhotoLabel">
+                <span class="badge badge-pill badge-info">
+                    Cover Photo
+                </span>
+                <!-- <button type="button" class="btn btn-sm"
+                    (click)="setMainPhoto(photo)"
+                    [ngClass]="photo.isMain ? 'btn-success active' : 'btn-secondary'"
+                    [disabled]="photo.isMain || photo.isApproved == false">Main
+                </button> -->
+            </div>
+        </div>
 
-        <div class="text-center">
-            <button type="button" class="btn btn-sm mr-1"
+    
+        <!-- <div class="text-center">
+
+        </div> -->
+            <!-- <div class=text-center> -->
+
+            <!-- </div> -->
+
+            <!-- <div class="row justify-content-center"> -->
+            <!-- <div class="button-container text-center" style="text-align: center;"> -->
+
+
+            <!-- </div> -->
+            <!-- </div> -->
+
+        <!-- <div class="col-lg-12" style="justify-content: center; text-align: center;">
+            <button type="button" class="btn btn-sm"
                 (click)="setMainPhoto(photo)"
                 [ngClass]="photo.isMain ? 'btn-success active' : 'btn-secondary'"
-                [disabled]="photo.isMain || photo.isApproved == false">Main</button>
-            <button type="button" class="btn btn-sm btn-danger"
-                (click)="deletePhoto(photo.id)"
-                [disabled]="photo.isMain"><i class="fa fa-trash-o"></i>
+                [disabled]="photo.isMain || photo.isApproved == false">Main
             </button>
-        </div>
+        </div> -->
     </div>
 </div>
-<div class="row mt-3">
-    <div class="col-md-3">
+<div class="row mt-5">
+    <div class="col-lg-12">
 
         <h3>Add Photos</h3>
 
@@ -37,7 +69,7 @@
 
     </div>
 
-    <div class="col-md-9" style="margin-bottom: 40px" *ngIf="uploader?.queue?.length">
+    <div class="col-md-9 mt-5" style="margin-bottom: 40px" *ngIf="uploader?.queue?.length">
 
         <h3>Upload queue</h3>
         <p>Queue length: {{ uploader?.queue?.length }}</p>

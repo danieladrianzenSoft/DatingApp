@@ -8,6 +8,7 @@ using DatingApp.API.Dtos;
 using DatingApp.API.Errors;
 using DatingApp.API.Helpers;
 using DatingApp.API.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace DatingApp.API.Controllers
@@ -15,6 +16,7 @@ namespace DatingApp.API.Controllers
     [ServiceFilter(typeof(LogUserActivity))]
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class UsersController : ControllerBase
     {
         private readonly IDatingRepository _repo;
@@ -131,11 +133,18 @@ namespace DatingApp.API.Controllers
                 return NotFound();
             }
 
-            //if (user.IsOnline == true)
-            //{
-            user.IsOnline = false;
+            if (user.IsOnline == true)
+            {
+                user.IsOnline = false;
+                if (await _repo.SaveAll())
+                {
+                    return Ok();
 
-            //}
+                }
+
+                return BadRequest(new ApiResponse(400));
+
+            }
             //else
             //{
             //    return BadRequest(new ApiResponse(400, "User is already offline"));
@@ -143,13 +152,9 @@ namespace DatingApp.API.Controllers
 
             //var userToReturn = _mapper.Map<UserForLogoutDto>(user);
 
-            if (await _repo.SaveAll())
-            {
-                return Ok();
 
-            }
 
-            return BadRequest(new ApiResponse(400));
+            return Ok();
 
         }
     }

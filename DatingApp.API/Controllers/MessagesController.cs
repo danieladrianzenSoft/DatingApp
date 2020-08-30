@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using AutoMapper;
@@ -16,6 +17,7 @@ namespace DatingApp.API.Controllers
     [ServiceFilter(typeof(LogUserActivity))]
     [Route("api/users/{userId}/[controller]")]
     [ApiController]
+    [Authorize]
     public class MessagesController : ControllerBase
     {
         private readonly IDatingRepository _repo;
@@ -55,12 +57,14 @@ namespace DatingApp.API.Controllers
 
             var messagesFromRepo = await _repo.GetMessagesForUser(messageParams);
 
+            var numberUnread = messagesFromRepo.Where(m => m.RecipientId == userId && m.IsRead == false).Count();
+
             var messages = _mapper.Map<IEnumerable<MessageToReturnDto>>(messagesFromRepo);
 
-            Response.AddPagination(messagesFromRepo.CurrentPage, messagesFromRepo.PageSize,
-                messagesFromRepo.TotalCount, messagesFromRepo.TotalPages);
+            //Response.AddPagination(messagesFromRepo.CurrentPage, messagesFromRepo.PageSize,
+            //    messagesFromRepo.TotalCount, messagesFromRepo.TotalPages);
 
-            return Ok(messages);
+            return Ok( new { messages, numberUnread });
         }
 
         [HttpGet("thread/{recipientId}")]

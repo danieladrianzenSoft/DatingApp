@@ -9,9 +9,9 @@ import { AuthService } from '../_services/auth.service';
 
 @Injectable()
 export class MessagesResolver implements Resolve<Message[]> {
-    pageNumber = 1;
-    pageSize = 20;
-    messageContainer = 'Unread';
+    // pageNumber = 1;
+    // pageSize = 20;
+    // messageContainer = 'All';
 
     constructor(private userService: UserService, private authService: AuthService,
                 private router: Router, private alertify: AlertifyService) {}
@@ -19,8 +19,9 @@ export class MessagesResolver implements Resolve<Message[]> {
     resolve(route: ActivatedRouteSnapshot): Observable<Message[]> {
         // this resolver allows us to get the data before we activate the
         // the route itself.
-        return this.userService.getMessages(this.authService.decodedToken.nameid,
-            this.pageNumber, this.pageSize, this.messageContainer).pipe(
+        return this.userService.getMessages(this.authService.decodedToken.nameid)
+            // this.pageNumber, this.pageSize, this.messageContainer)
+            .pipe(
             catchError(error => {
                 this.alertify.error('Problem retrieving messages');
                 this.router.navigate(['/home']);
