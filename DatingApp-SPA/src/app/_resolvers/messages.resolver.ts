@@ -10,7 +10,7 @@ import { AuthService } from '../_services/auth.service';
 @Injectable()
 export class MessagesResolver implements Resolve<Message[]> {
     // pageNumber = 1;
-    // pageSize = 20;
+    // pageSize = 10;
     // messageContainer = 'All';
 
     constructor(private userService: UserService, private authService: AuthService,
@@ -19,9 +19,7 @@ export class MessagesResolver implements Resolve<Message[]> {
     resolve(route: ActivatedRouteSnapshot): Observable<Message[]> {
         // this resolver allows us to get the data before we activate the
         // the route itself.
-        return this.userService.getMessages(this.authService.decodedToken.nameid)
-            // this.pageNumber, this.pageSize, this.messageContainer)
-            .pipe(
+        return this.userService.getMessages(this.authService.decodedToken.nameid).pipe(
             catchError(error => {
                 this.alertify.error('Problem retrieving messages');
                 this.router.navigate(['/home']);

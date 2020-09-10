@@ -5,6 +5,7 @@ import { catchError } from 'rxjs/operators';
 import { AlertifyService } from './alertify.service';
 import { Router } from '@angular/router';
 import { AuthService } from './auth.service';
+import { THIS_EXPR } from '@angular/compiler/src/output/output_ast';
 
 @Injectable()
 export class ErrorInterceptor implements HttpInterceptor {
@@ -29,6 +30,9 @@ export class ErrorInterceptor implements HttpInterceptor {
                         }
                         // this.alertify.error(error.message);
                         // this.alertify.error(error.error.message);
+                        // this.authService.revokeToken();
+                        // this.router.navigate(['/login']);
+
                         return throwError(error.error.message);
                     }
                     // if (error.status === 403 && error.error.message === 'Unverified') {
@@ -37,6 +41,13 @@ export class ErrorInterceptor implements HttpInterceptor {
                     if (error.stats === 500){
                         return throwError(error.error.message);
                     }
+
+                    if (error.status === 0){
+                        this.alertify.error('Our servers are experiencing difficulties. Please try again later');
+                        return throwError(error.status);
+
+                    }
+
                     if (error instanceof HttpErrorResponse){
                         const applicationError = error.headers.get('Application-Error');
                         if (applicationError){

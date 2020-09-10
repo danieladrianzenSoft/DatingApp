@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
+using System.Linq;
 using System.Security.Claims;
+using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 using DatingApp.API.Models;
@@ -9,7 +11,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 
-namespace DatingApp.API.Helpers
+namespace DatingApp.API.Security
 {
     public class TokenService : ITokenService
     {
@@ -36,7 +38,8 @@ namespace DatingApp.API.Helpers
             var claims = new List<Claim>
             {
                 new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
-                new Claim(ClaimTypes.Name, user.UserName)
+                new Claim(ClaimTypes.Name, user.UserName),
+                //new Claim(ClaimTypes.Email, user.Email)
             };
 
             var roles = await _userManager.GetRolesAsync(user);
@@ -52,8 +55,8 @@ namespace DatingApp.API.Helpers
             var tokenDescriptor = new SecurityTokenDescriptor
             {
                 Subject = new ClaimsIdentity(claims),
-                Expires = DateTime.Now.AddDays(1), //The token is valid for 7 days. After 7 days,
-                //token seizes to be valid, and our server will not accept it afterwards.
+                Expires = DateTime.UtcNow.AddMinutes(8), //The token is valid for 8 mins. After 7 mins, on client side,
+                //we will request a new token using the refresh token, which expires after 1 hour.
                 SigningCredentials = creds,
                 Issuer = _config["Token:Issuer"]
             };
@@ -65,5 +68,19 @@ namespace DatingApp.API.Helpers
 
             return tokenHandler.WriteToken(token);
         }
+
+        public RefreshToken GenerateRefreshToken()
+        {
+            var randomNumber = new byte[32];
+            using (var rng = RandomNumberGenerator.Create())
+            {
+                rng.GetBytes(randomNumber);
+            }
+            return new RefreshToken
+            {
+                Token = Convert.ToBase64String(randomNumber)
+            };
+        }
+
     }
 }

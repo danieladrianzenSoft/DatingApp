@@ -1,5 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Text.Json.Serialization;
+using DatingApp.API.Security;
 using Microsoft.AspNetCore.Identity;
 
 namespace DatingApp.API.Models
@@ -23,9 +26,12 @@ namespace DatingApp.API.Models
         public virtual ICollection<Message> MessagesSent { get; set; }
         public virtual ICollection<Message> MessagesReceived { get; set; }
         public virtual ICollection<UserRole> UserRoles { get; set; }
+        public virtual ICollection<RefreshToken> RefreshTokens { get; set; }
 
         public User()
         {
+
         }
+
     }
 }

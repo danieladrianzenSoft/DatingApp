@@ -49,10 +49,9 @@ export class NavComponent implements OnInit {
     .subscribe(event => {
       this.showNavbar(event.navbar); // show the toolbar?
     });
-    if (this.loggedIn()){
-      this.chat.createHubConnection(this.authService.decodedToken.nameid);
+    // if (this.authService.loggedIn()){
       // this.chat.startConnection(this.authService.decodedToken.nameid);
-      this.chat.newMessagesCounterUpdate.subscribe((newMessageCounter: number) => {
+    this.chat.newMessagesCounterUpdate.subscribe((newMessageCounter: number) => {
         // console.log(newMessageCounter);
         if (newMessageCounter > 0){
           this.newMessageNotification = true;
@@ -61,7 +60,7 @@ export class NavComponent implements OnInit {
           this.newMessageNotification = false;
         }
       });
-    }
+    // }
   }
 
   showNavbar(event): any {
@@ -119,13 +118,9 @@ export class NavComponent implements OnInit {
     // this.isLoginButtonVisible = true;
     // this.isRegisterButtonVisible = true;
     // this.userService.goOffline(this.authService.decodedToken.nameid);
-    this.goOffline();
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
-    this.authService.decodedToken = null;
-    this.authService.currentUser = null;
+    // this.goOffline();
+    this.authService.logout();
     this.alertify.message('logged out');
-    this.router.navigate(['/home']);
   }
 
 

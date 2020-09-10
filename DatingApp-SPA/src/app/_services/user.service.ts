@@ -1,13 +1,14 @@
-import { Injectable } from '@angular/core';
+import { Injectable, Output, EventEmitter } from '@angular/core';
 import { environment } from '../../environments/environment';
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { User } from '../_models/user';
 import { Like } from '../_models/like';
-import { Observable } from 'rxjs';
+import { Observable, BehaviorSubject } from 'rxjs';
 import { PaginatedResult } from '../_models/Pagination';
 import { map } from 'rxjs/operators';
 import { Message } from '../_models/message';
 import { HubConnection, HubConnectionBuilder } from '@microsoft/signalr';
+import { ChatService } from './chat.service';
 
 @Injectable({
   providedIn: 'root'
@@ -15,8 +16,17 @@ import { HubConnection, HubConnectionBuilder } from '@microsoft/signalr';
 export class UserService {
   baseUrl = environment.apiUrl;
   hubConnection: HubConnection | null = null;
+  messagesTabActive = new BehaviorSubject<boolean>(false);
 
-  constructor(private http: HttpClient) { }
+  constructor(private http: HttpClient, private chat: ChatService) { }
+
+  changeUserDetailedTab(tab: number): void{
+    const messagesTab = 3;
+    // this.messagesTabActive.next(tab === messagesTab);
+    this.messagesTabActive.next(tab === messagesTab);
+    // console.log(tab);
+    // console.log(this.messagesTabActive);
+  }
 
   getUsers(page?, itemsPerPage?, userParams?, likesParam?): Observable<PaginatedResult<User[]>> {
     const paginatedResult: PaginatedResult<User[]> = new PaginatedResult<User[]>();
@@ -74,31 +84,6 @@ export class UserService {
     return this.http.post(this.baseUrl + 'users/' + id + '/likeunlike/' + recipientId, {});
   }
 
-  // getMessages(id: number, page?, itemsPerPage?, messageContainer?): any{
-  //   const paginatedResult: PaginatedResult<Message[]> = new PaginatedResult<Message[]>();
-  //   let params = new HttpParams();
-
-  //   params = params.append('MessageContainer', messageContainer);
-
-  //   if (page != null && itemsPerPage != null){
-  //     params = params.append('pageNumber', page);
-  //     params = params.append('pageSize', itemsPerPage);
-  //   }
-
-  //   return this.http.get<Message[]>(this.baseUrl + 'users/' + id + '/messages',
-  //     {observe: 'response', params})
-  //     .pipe(
-  //       map(response => {
-  //         paginatedResult.result = response.body;
-  //         if (response.headers.get('Pagination') !== null) {
-  //           paginatedResult.pagination = JSON.parse(response.headers.get('Pagination'));
-  //         }
-
-  //         return paginatedResult;
-  //       })
-  //     );
-  // }
-
   getMessages(id: number, messageContainer?): any{
     // let params = new HttpParams();
 
@@ -107,8 +92,30 @@ export class UserService {
     return this.http.get<Message[]>(this.baseUrl + 'users/' + id + '/messages');
   }
 
-  getMessageThread(id: number, recipientId: number): any{
-    return this.http.get<Message[]>(this.baseUrl + 'users/' + id + '/messages/thread/' + recipientId);
+  // getMessageThread(id: number, recipientId: number, page?, itemsPerPage?, messageContainer?): any{
+  getMessageThread(id: number, recipientId: number, page?, itemsPerPage?, messageContainer?): Observable<PaginatedResult<Message[]>> {
+    const paginatedResult: PaginatedResult<Message[]> = new PaginatedResult<Message[]>();
+    let params = new HttpParams();
+    // const paginatedResult: PaginatedResult<Message[]> = new PaginatedResult<Message[]>();
+    // let params = new HttpParams();
+    if (page != null && itemsPerPage != null){
+      params = params.append('pageNumber', page);
+      params = params.append('pageSize', itemsPerPage);
+    }
+    return this.http.get<Message[]>(this.baseUrl + 'users/' + id + '/messages/thread/' + recipientId, {observe: 'response', params})
+      .pipe(
+        map(response => {
+          paginatedResult.result = response.body;
+          if (response.headers.get('Pagination') != null) {
+            paginatedResult.pagination = JSON.parse(response.headers.get('Pagination'));
+          }
+          return paginatedResult;
+        })
+      );
+  }
+
+  deleteMessageThread(userId: number, recipientId: number): any{
+    return this.http.post(this.baseUrl + 'users/' + userId + '/messages/deleteThread/' + recipientId, {});
   }
 
   sendMessage(id: number, message: Message): any{
@@ -121,28 +128,11 @@ export class UserService {
 
   markAsRead(userId: number, messageId: number): any{
     this.http.post(this.baseUrl + 'users/' + userId + '/messages/' + messageId + '/read', {})
-    .subscribe();
+    .subscribe(next =>  this.chat.markAsRead(userId, messageId));
   }
 
   goOffline(userId: number): any{
     return this.http.post(this.baseUrl + 'users/' + userId + '/gooffline', {});
   }
-
-  // createHubConnection(currentUserId: string): void{
-  //   this.hubConnection = new HubConnectionBuilder()
-  //     .withUrl('http://localhost:5000/chat', {
-  //       accessTokenFactory: () => currentUserId
-  //     })
-  //     .build();
-
-  //   this.hubConnection
-  //       .start()
-  //       .then(() => console.log(this.hubConnection.state))
-  //       .catch(error => console.log('Error establishing connection: ', error));
-  // }
-
-  // stopHubConnection(): void{
-  //   this.hubConnection.stop();
-  // }
 
 }

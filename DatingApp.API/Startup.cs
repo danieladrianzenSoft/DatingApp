@@ -6,6 +6,7 @@ using DatingApp.API.Data;
 using DatingApp.API.Errors;
 using DatingApp.API.Helpers;
 using DatingApp.API.Models;
+using DatingApp.API.Security;
 using DatingApp.API.SignalR;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
@@ -144,7 +145,7 @@ namespace DatingApp.API
 
             app.UseMiddleware<ExceptionMiddleware>();
 
-            app.UseStatusCodePagesWithReExecute("/errors/{0}");
+            //app.UseStatusCodePagesWithReExecute("/errors/{0}");
 
             app.UseHttpsRedirection();
 

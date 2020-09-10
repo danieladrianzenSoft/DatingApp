@@ -1,10 +1,41 @@
 <div class="card">
-    <div class="card-body" id="message-thread" #messageThread>
+    <div class="card-body" id="message-thread" #messageThread
+    infinite-scroll
+    [infiniteScrollUpDistance]="1"
+    [infiniteScrollThrottle]="20"
+    [scrollWindow]="false"
+    (scrolledUp)="onScrollUp()">
         <div *ngIf="messages?.length===0">
             <p>No messages yet... say hi by using the message box below</p>
         </div>
         <div>
-            <div class="row" *ngFor="let message of messages">
+            <div *ngFor="let group of groupedMessages">
+                <p class="text-center text-muted mt-3" style="font-size:smaller; margin-bottom:-15px">{{group[0] | date:'longDate'}}</p><hr class="mb-4">
+                <div class="row" *ngFor="let message of group[1]">
+                    <!-- <p>{{message[0]}}</p> -->
+                    <div class="col-7 message other-message" *ngIf="message.senderId == recipientId">
+                        <b>{{message.senderDisplayName}}</b><br>
+                        <span>{{message.content}}</span><br>
+                        <div class="messageHeader float-right">
+                            <span class="text-muted"><i class="fa fa-clock-o text-muted"></i>
+                                {{message.messageSent | date:'shortTime'}}
+                            </span>
+                        </div>
+                    </div>
+                    <div class="col-7 offset-5 message user-message" *ngIf="message.senderId != recipientId">
+                        <b>{{message.senderDisplayName}}</b><br>
+                        <span>{{message.content}}</span><br>
+                        <div class="messageHeader float-right">
+                            <span class="text-muted"><i class="fa fa-clock-o text-muted"></i>
+                                {{message.messageSent | date:'shortTime'}}
+                            </span>
+                            <span *ngIf="message.isRead == false" class="text-info"> <i class="fa fa-check-circle-o"></i></span>
+                            <span *ngIf="message.isRead" class="text-info"> <i class="fa fa-check-circle"></i></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- <div class="row" *ngFor="let message of messages">
                 <div class="col-7 message other-message" *ngIf="message.senderId == recipientId">
                     <b>{{message.senderDisplayName}}</b><br>
                     <span>{{message.content}}</span><br>
@@ -12,8 +43,6 @@
                         <span class="text-muted"><i class="fa fa-clock-o text-muted"></i>
                             {{message.messageSent | date:'short'}}
                         </span>
-                        <!-- <span *ngIf="message.isRead == false" class="text-info"> <i class="fa fa-check-circle-o"></i></span>
-                        <span *ngIf="message.isRead" class="text-info"> <i class="fa fa-check-circle"></i></span> -->
                     </div>
                 </div>
                 <div class="col-7 offset-5 message user-message" *ngIf="message.senderId != recipientId">
@@ -27,14 +56,15 @@
                         <span *ngIf="message.isRead" class="text-info"> <i class="fa fa-check-circle"></i></span>
                     </div>
                 </div>
-            </div>
+            </div> -->
         </div>
         </div>
         
     <div class="card-footer">
         <form #messageForm="ngForm" (ngSubmit)="messageForm.valid && sendMessage()">
             <div class="input-group">
-                <textarea rows="1" autosize maxRows="3" type="text" [(ngModel)]="newMessageToSend.content" name="content"
+                <textarea rows="1" autosize maxRows="3" type="text" [(ngModel)]="newMessageToSend.content" 
+                    (focus)="resetNewMessagesCounterForThread(this.userId)" name="content"
                     required class="form-control input-sm text-area" placeholder="Send a private message"></textarea>
                 <div class="input-group-append">
                     <button class="btn btn-info" [disabled]="messageForm.valid==false"><i

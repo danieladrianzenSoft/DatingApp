@@ -23,15 +23,17 @@ export class MessagesComponent implements OnInit {
               private route: ActivatedRoute, private alertify: AlertifyService) { }
 
   ngOnInit(): void {
-    const currentUserId = +this.authService.decodedToken.nameid;
-    this.userId = currentUserId;
+    if (this.authService.loggedIn()){
+      const currentUserId = +this.authService.decodedToken.nameid;
+      this.userId = currentUserId;
 
-    this.route.data.subscribe(data => {
-      this.messages = data.messages.messages;
-      this.numberUnread = data.messages.numberUnread;
-      // this.pagination = data.messages.pagination;
-    });
-
+      this.route.data.subscribe(data => {
+        // console.log(data);
+        this.messages = data.messages.messages;
+        this.numberUnread = data.messages.numberUnread;
+        // this.pagination = data.messages.pagination;
+      });
+    }
   }
 
   // loadMessages(): any{
@@ -55,6 +57,18 @@ export class MessagesComponent implements OnInit {
       }, error => {
         this.alertify.error(error);
       });
+  }
+
+  deleteConversation(recipientId: number, messageId: number): any{
+    this.alertify.confirm('Are you sure you want to delete this conversation?', () => {
+      this.userService.deleteMessageThread(this.userId, recipientId)
+      .subscribe(() => {
+        this.messages.splice(this.messages.findIndex(m => m.id === messageId), 1);
+        this.alertify.success('Conversation has been deleted');
+      }, error => {
+        this.alertify.error('Failed to delete the conversation');
+      });
+    });
   }
 
   deleteMessage(id: number): any {

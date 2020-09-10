@@ -11,6 +11,7 @@ import { Router } from '@angular/router';
 })
 export class AwaitingEmailVerificationComponent implements OnInit {
   @Input() loginInfo: any = {};
+  loading = false;
 
   constructor(private authService: AuthService, private alertify: AlertifyService,
               private router: Router) { }
@@ -22,13 +23,20 @@ export class AwaitingEmailVerificationComponent implements OnInit {
     // });
   }
 
-  sendLink(): void{
-    this.authService.sendEmailVerification(this.loginInfo).subscribe(data => {
-      this.alertify.success('Email sent');
-    }, error => {
-      this.alertify.error(error);
-    }
-    );
+  sendLink(): any{
+    this.loading = true;
+    this.authService.sendEmailVerification(this.loginInfo)
+      .subscribe(next => {
+        this.alertify.success('Email sent');
+        this.loading = false;
+      });
+
+    // this.authService.sendEmailVerification(this.loginInfo).subscribe(data => {
+    //   this.alertify.success('Email sent');
+    // }, error => {
+    //   this.alertify.error(error);
+    // }
+    // );
   }
 
 }

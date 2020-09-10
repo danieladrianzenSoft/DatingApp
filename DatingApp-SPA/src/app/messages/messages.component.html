@@ -40,7 +40,10 @@
             </td>
             <td>
               <div>
-                <img [src]="message.recipientId !== userId ? message.recipientPhotoUrl : message.senderPhotoUrl" class="img-circle rounded-circle mr-1">
+                <img [src]="message.recipientId !== userId ? 
+                  message.recipientPhotoUrl  || '../../../../../assets/user.png' : 
+                  message.senderPhotoUrl  || '../../../../../assets/user.png'" 
+                  class="img-circle rounded-circle mr-1">
                 {{message.recipientId !== userId ? message.recipientDisplayName : message.senderDisplayName}}
               </div>
             </td>
@@ -66,7 +69,10 @@
             </td> -->
             <td>{{message.messageSent | timeago}}</td>
             <td>
-              <button class="btn btn-danger btn-sm" (click)="$event.stopPropagation()" (click)="deleteMessage(message.id)"><i class="fa fa-trash"></i></button>
+              <button class="btn btn-danger btn-sm" 
+                (click)="$event.stopPropagation()" 
+                (click)="deleteConversation(message.recipientId !== userId ? message.recipientId : message.senderId, message.id)">
+                <i class="fa fa-trash"></i></button>
             </td>
           </tr>
         </tbody>

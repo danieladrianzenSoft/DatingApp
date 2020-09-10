@@ -11,6 +11,7 @@
     <Folder Include="Helpers\" />
     <Folder Include="Errors\" />
     <Folder Include="SignalR\" />
+    <Folder Include="Security\" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="3.1.6" />

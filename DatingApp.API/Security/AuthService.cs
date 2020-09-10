@@ -1,10 +1,11 @@
 ﻿using System;
 using System.Threading.Tasks;
 using System.Web;
+using DatingApp.API.Helpers;
 using DatingApp.API.Models;
 using Microsoft.AspNetCore.Identity;
 
-namespace DatingApp.API.Helpers
+namespace DatingApp.API.Security
 {
     public class AuthService : IAuthService
     {
@@ -43,6 +44,22 @@ namespace DatingApp.API.Helpers
             string message = $"Congratulations {user.DisplayName}!, <br /> <br /> You have successfully activated your account!\n " +
                 "Welcome to DatingApp.";
             await _mailer.SendEmailAsync(user.Email, subject, message );
+        }
+
+        public async Task SendPasswordResetLink(User user)
+        {
+            string resetPasswordToken = await _userManager.GeneratePasswordResetTokenAsync(user);
+            var encodedToken = HttpUtility.UrlEncode(resetPasswordToken);
+            var resetPasswordLink = ("http://localhost:4200/reset-password?email=" + user.Email + "&token=" + encodedToken);
+
+            string subject = "Your DatingApp account has been verified";
+            string message = $"Hi {user.DisplayName}, <br /> <br />" +
+                $"We received a request to reset the password associated with your DatingApp account. " +
+                $"If you made this request, <a href='{resetPasswordLink}'>click here</a> to continue with the " +
+                $"process. <br /> <br />" +
+                $"If you did not make this request, please contact us. <br /> <br />" +
+                $"Thanks, <br /> <br /> DatingApp";
+            await _mailer.SendEmailAsync(user.Email, subject, message);
         }
     }
 }

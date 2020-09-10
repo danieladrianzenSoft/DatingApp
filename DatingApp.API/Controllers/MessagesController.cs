@@ -46,7 +46,7 @@ namespace DatingApp.API.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetMessagesForUser(int userId, [FromQuery]MessageParams messageParams)
+        public async Task<IActionResult> GetMessagesForUser(int userId, [FromQuery] MessageParams messageParams)
         {
             if (userId != int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value))
             {
@@ -57,7 +57,7 @@ namespace DatingApp.API.Controllers
 
             var messagesFromRepo = await _repo.GetMessagesForUser(messageParams);
 
-            var numberUnread = messagesFromRepo.Where(m => m.RecipientId == userId && m.IsRead == false).Count();
+            var numberUnread = _repo.GetNumberUnreadMessagesForUser(messageParams);
 
             var messages = _mapper.Map<IEnumerable<MessageToReturnDto>>(messagesFromRepo);
 
@@ -68,20 +68,41 @@ namespace DatingApp.API.Controllers
         }
 
         [HttpGet("thread/{recipientId}")]
-        public async Task<IActionResult> GetMessageThread(int userId, int recipientId)
+        public async Task<IActionResult> GetMessageThread(int userId, int recipientId, [FromQuery] MessageParams messageParams)
         {
             if (userId != int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value))
             {
                 return Unauthorized(new ApiResponse(401));
             }
 
-            var messageFromRepo = await _repo.GetMessageThread(userId, recipientId);
+            var messageFromRepo = await _repo.GetMessageThread(userId, recipientId, messageParams);
 
             var messageThread = _mapper.Map<IEnumerable<MessageToReturnDto>>(messageFromRepo);
 
-            return Ok(messageThread);
+            Response.AddPagination(messageFromRepo.CurrentPage, messageFromRepo.PageSize, messageFromRepo.TotalCount,
+                messageFromRepo.TotalPages);
+
+            //return Ok(messageThread);
+            return Ok(messageThread.OrderBy(m => m.MessageSent));
+
 
         }
+
+        //[HttpGet("thread/{recipientId}")]
+        //public async Task<IActionResult> GetMessageThread(int userId, int recipientId, [FromQuery] VerticalPaginationParams verticalPaginationParams)
+        //{
+        //    if (userId != int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value))
+        //    {
+        //        return Unauthorized(new ApiResponse(401));
+        //    }
+
+        //    var messageEnvelopeFromRepo = await _repo.GetMessageThread(userId, recipientId, verticalPaginationParams);
+
+        //    //var messages = _mapper.Map<IEnumerable<MessageToReturnDto>>(messageEnvelopeFromRepo.Messages);
+
+        //    return Ok(messageEnvelopeFromRepo);
+
+        //}
 
         [HttpPost]
         public async Task<IActionResult> CreateMessage(int userId, MessageForCreationDto messageForCreationDto)
@@ -144,6 +165,42 @@ namespace DatingApp.API.Controllers
                 return NoContent();
 
             throw new Exception("Error deleting the message");
+
+        }
+
+        [HttpPost("deleteThread/{recipientId}")]
+        public async Task<IActionResult> DeleteConversation(int userId, int recipientId)
+        {
+            // This will be a httppost, not a delete, because we won't be actually deleting the messages
+            // unless both users have tried to delete it.
+
+            if (userId != int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value))
+            {
+                return Unauthorized(new ApiResponse(401));
+            }
+
+            var messagesFromRepo = await _repo.GetMessageThreadForDeletion(userId, recipientId);
+
+            foreach (var message in messagesFromRepo)
+            {
+                if (message.SenderId == userId)
+                {
+                    message.SenderDeleted = true;
+                }
+                if (message.RecipientId == userId)
+                {
+                    message.RecipientDeleted = true;
+                }
+                if (message.SenderDeleted && message.RecipientDeleted)
+                {
+                    _repo.Delete(message);
+                }
+            }
+
+            if (await _repo.SaveAll())
+                return NoContent();
+
+            throw new Exception("Error deleting the conversation");
 
         }
 

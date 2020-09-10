@@ -20,6 +20,13 @@ namespace DatingApp.API.Helpers
                     s.Photos.FirstOrDefault(p => p.IsMain).Url))
                 .ForMember(d => d.Age, o => o.MapFrom(s =>
                     s.DateOfBirth.CalculateAge()));
+            CreateMap<User, UserForRefreshTokenDto>()
+                .ForMember(d => d.PhotoUrl, o => o.MapFrom(s =>
+                    s.Photos.FirstOrDefault(p => p.IsMain).Url))
+                .ForMember(d => d.Age, o => o.MapFrom(s =>
+                    s.DateOfBirth.CalculateAge()))
+                .ForMember(d => d.RefreshToken, o => o.MapFrom(s =>
+                    s.RefreshTokens.OrderByDescending(x => x.Expires).FirstOrDefault().Token));
             CreateMap<Photo, PhotosForDetailedDto>();
             CreateMap<UserForUpdateDto, User>();
             //CreateMap<User, UserForLogoutDto>();

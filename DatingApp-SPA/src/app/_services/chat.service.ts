@@ -27,9 +27,7 @@ export class ChatService {
   // isAuthorizedSubscription: Subscription | undefined;
   // isAuthorized = false;
 
-  constructor(private authService: AuthService,
-              private userService: UserService,
-              private alertify: AlertifyService) {}
+  constructor(private alertify: AlertifyService) {}
 
     setInitialNewMessagesCounter(numberUnread: number): void{
       this.newMessagesCounter = numberUnread;
@@ -46,6 +44,11 @@ export class ChatService {
       // console.log(this.newMessagesCounter);
     }
 
+    resetNewMessagesCounter(): void{
+      this.newMessagesCounter = 0;
+      this.newMessagesCounterUpdate.emit(this.newMessagesCounter);
+    }
+
     createHubConnection = (currentUserId) => {
       if (this.hubConnection){
         this.stopHubConnection(currentUserId);
@@ -54,7 +57,8 @@ export class ChatService {
         .withUrl(this.baseUrl + 'chat', {
           accessTokenFactory: () => localStorage.getItem('token')
         })
-        .configureLogging(LogLevel.Information)
+        .configureLogging(LogLevel.None)
+        // .configureLogging(LogLevel.Information)
         .build();
       this.startConnection(currentUserId);
       // }
@@ -103,9 +107,11 @@ export class ChatService {
     markAsRead(currentUserId, id: number): void{
       // if (this.hubConnection && this.hubConnection.state === 'Connected'){
         this.hubConnection.invoke('MarkAsRead', currentUserId, id)
-        .catch(error => console.error(error))
         .then(() => {
-          this.updateNewMessagesCounter(-1);
+          // this.updateNewMessagesCounter(-1);
+        })
+        .catch(error => {
+          // console.error(error);
         });
       // }
     }
@@ -132,7 +138,6 @@ export class ChatService {
         // })
         // .catch(error => console.error(error));
     }
-
   }
 
 //     // loadMessages(): any{

@@ -31,6 +31,7 @@ namespace DatingApp.API.SignalR
             _mapper = mapper;
             //_userManager = userManager;
         }
+
         public async Task SendMessage(int userId, MessageForCreationDto messageForCreationDto)
         {
 

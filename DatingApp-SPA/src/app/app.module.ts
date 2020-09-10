@@ -1,5 +1,5 @@
 import { BrowserModule, HammerModule, HammerGestureConfig} from '@angular/platform-browser';
-import { NgModule } from '@angular/core';
+import { NgModule, APP_INITIALIZER } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { FileUploadModule } from 'ng2-file-upload/';
 import { JwtModule } from '@auth0/angular-jwt';
@@ -10,17 +10,19 @@ import { PaginationModule } from 'ngx-bootstrap/pagination';
 import { TabsModule } from 'ngx-bootstrap/tabs';
 import { ButtonsModule } from 'ngx-bootstrap/buttons';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { HttpClientModule } from '@angular/common/http';
+import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
 import { CollapseModule } from 'ngx-bootstrap/collapse';
 import { ModalModule } from 'ngx-bootstrap/modal';
 import { AutosizeModule } from 'ngx-autosize';
+import { NgxSpinnerModule } from 'ngx-spinner';
+import { InfiniteScrollModule } from 'ngx-infinite-scroll';
 
 import { AppComponent } from './app.component';
 import { NavComponent } from './nav/nav.component';
 import { AuthService } from './_services/auth.service';
 import { HomeComponent } from './home/home.component';
 import { RegisterComponent } from './register/register.component';
-import { ErrorInterceptorProvider } from './_services/error.interceptor';
+import { ErrorInterceptorProvider, ErrorInterceptor } from './_services/error.interceptor';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { MemberListComponent } from './members/member-list/member-list.component';
 import { ListsComponent } from './lists/lists.component';
@@ -53,6 +55,10 @@ import { ConfirmEmailResolver } from './_resolvers/confirm-email.resolver';
 import { AwaitingEmailVerificationComponent } from './verify-account/awaiting-email-verification/awaiting-email-verification.component';
 import { TextInputComponent } from './shared/text-input/text-input.component';
 import { ChatService } from './_services/chat.service';
+import { LoadingInterceptor } from './_services/loading.interceptor';
+import { ForgotPasswordComponent } from './password-reset/forgot-password/forgot-password.component';
+import { ResetPasswordComponent } from './password-reset/reset-password/reset-password.component';
+import { appInitializer } from './_resolvers/app.Initializer';
 
 export function tokenGetter(): any {
    return localStorage.getItem('token');
@@ -87,6 +93,8 @@ export class MyHammerConfig extends HammerGestureConfig  {
       ConfirmEmailComponent,
       AwaitingEmailVerificationComponent,
       TextInputComponent,
+      ForgotPasswordComponent,
+      ResetPasswordComponent,
    ],
    imports: [
       BrowserModule,
@@ -107,6 +115,8 @@ export class MyHammerConfig extends HammerGestureConfig  {
       FileUploadModule,
       HammerModule,
       AutosizeModule,
+      NgxSpinnerModule,
+      InfiniteScrollModule,
       JwtModule.forRoot({
          config: {
             tokenGetter,
@@ -127,6 +137,9 @@ export class MyHammerConfig extends HammerGestureConfig  {
       MemberEditResolver,
       ConfirmEmailResolver,
       ErrorInterceptorProvider,
+      LoadingInterceptor,
+      {provide: HTTP_INTERCEPTORS, useClass: LoadingInterceptor, multi: true},
+      {provide: APP_INITIALIZER, useFactory: appInitializer, multi: true, deps: [AuthService]},
       PreventUnsavedChangesGuard,
       ListsResolver,
       MessagesResolver,

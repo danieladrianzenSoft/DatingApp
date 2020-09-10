@@ -1,9 +1,11 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ɵConsole } from '@angular/core';
 import { AuthService } from '../_services/auth.service';
 import { AlertifyService } from '../_services/alertify.service';
 import { Router } from '@angular/router';
 import { UserService } from '../_services/user.service';
 import { ChatService } from '../_services/chat.service';
+import { User } from '../_models/user';
+import { BehaviorSubject } from 'rxjs';
 
 @Component({
   selector: 'app-login',
@@ -16,6 +18,7 @@ export class LoginComponent implements OnInit {
   showNotVerified = false;
   loginInfo: any = {};
   numberMessagesUnread: any = {};
+  showForgotPassword = false;
 
   constructor(public authService: AuthService, private alertify: AlertifyService,
               private router: Router, private userService: UserService,
@@ -30,18 +33,22 @@ export class LoginComponent implements OnInit {
 
   login(): any{
     this.loginInfo = Object.assign({}, {username: this.model.username, password: this.model.password});
-    this.authService.login(this.model).subscribe( next => {
+    this.authService.login(this.model).subscribe( data => {
       this.alertify.success('Logged in successfully');
       this.authService.unverifiedAccount.next(false);
+      // console.log(data);
     }, error => {
-      this.alertify.error(error);
+      if (error !== 0){
+        this.alertify.error(error);
+      }
     }, () => {
       this.router.navigate(['/members']);
       this.userService.getMessages(this.authService.decodedToken.nameid)
       .subscribe(data => {
-        this.chat.createHubConnection(this.authService.decodedToken.nameid);
-        // this.chat.startConnection(this.authService.decodedToken.nameid);
         this.chat.setInitialNewMessagesCounter(data.numberUnread);
+        // this.chat.createHubConnection(this.authService.decodedToken.nameid);
+        // // this.chat.startConnection(this.authService.decodedToken.nameid);
+        // this.chat.setInitialNewMessagesCounter(data.numberUnread);
       });
     });
     // login method returns an observable, and we always need to subscribe
@@ -52,6 +59,10 @@ export class LoginComponent implements OnInit {
     return this.authService.loggedIn();
     // !! is shorthand for an if statement: if there's something in the token
     // return true, otherwise return false.
+  }
+
+  ForgotPassword(): void{
+    this.showForgotPassword = true;
   }
 
   // goOffline(): any{

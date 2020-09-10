@@ -1,11 +1,16 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Linq;
+using System.Security.Claims;
+using System.Threading.Tasks;
 using AutoMapper;
 using DatingApp.API.Data;
 using DatingApp.API.Dtos;
 using DatingApp.API.Errors;
 using DatingApp.API.Helpers;
 using DatingApp.API.Models;
+using DatingApp.API.Security;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -61,6 +66,9 @@ namespace DatingApp.API.Controllers
                 return BadRequest(new ApiResponse(400, "User with this username already exists"));
             }
 
+            //var refreshToken = _tokenService.GenerateRefreshToken();
+            //userToCreate.RefreshTokens.Add(refreshToken);
+
             var result = await _userManager.CreateAsync(userToCreate, userForRegisterDto.Password);
 
             // we map to a userfordetailedDto  because we don't want to return username and password
@@ -106,16 +114,21 @@ namespace DatingApp.API.Controllers
             if (result.Succeeded)
             {
 
-                var appUser = await _userManager.Users.Include(p => p.Photos)
+                var appUser = await _userManager.Users.Include(p => p.Photos).Include(r => r.RefreshTokens)
                     .FirstOrDefaultAsync(u => u.NormalizedUserName == userForLoginDto.Username.ToUpper());
                 appUser.IsOnline = true;
 
+                var refreshToken = _tokenService.GenerateRefreshToken();
 
-                var userToReturn = _mapper.Map<UserForListDto>(appUser);
+                appUser.RefreshTokens.Add(refreshToken);
 
+                await _userManager.UpdateAsync(appUser);
+
+                var userToReturn = _mapper.Map<UserForRefreshTokenDto>(appUser);
 
                 await _repo.SaveAll();
 
+                SetTokenCookie(userToReturn.RefreshToken);
 
                 return Ok(new
                 {
@@ -157,11 +170,11 @@ namespace DatingApp.API.Controllers
                 return BadRequest(new ApiResponse(400));
             }
 
-            //if (user.EmailConfirmed == true)
-            //{
-            //    return BadRequest(new ApiResponse(400, "Your email address has already been verified"));
-            //    //return Ok(false);
-            //}
+            if (user.EmailConfirmed == true)
+            {
+                //return BadRequest(new ApiResponse(400, "Your email address has already been verified"));
+                return Ok(false);
+            }
 
             var result = await _userManager.ConfirmEmailAsync(user, token);
 
@@ -204,12 +217,11 @@ namespace DatingApp.API.Controllers
 
                 await _authService.SendEmailVerificationLink(user);
 
-                return Ok();
+                return Ok(true);
                 
             }
 
             return Unauthorized(new ApiResponse(401));
-
 
         }
 
@@ -219,5 +231,201 @@ namespace DatingApp.API.Controllers
         {
             return await _userManager.FindByEmailAsync(email) != null;
         }
+
+        [AllowAnonymous]
+        [HttpPost("forgotPassword")]
+        public async Task<IActionResult> ForgotPassword(UserForForgotPasswordDto userForForgotPasswordDto)
+        {
+            var user = await _userManager.FindByEmailAsync(userForForgotPasswordDto.Email);
+
+            if (user == null)
+            {
+                return Unauthorized(new ApiResponse(401));
+            }
+            if (await _userManager.IsEmailConfirmedAsync(user) == false)
+            {
+                return Unauthorized(new ApiResponse(401, "Email address not verified"));
+            }
+
+            await _authService.SendPasswordResetLink(user);
+
+            return Ok(true);
+        }
+
+        [AllowAnonymous]
+        [HttpPost("resetPassword")]
+        public async Task<IActionResult> ResetPassword(UserForPasswordResetDto model)
+        {
+            if (model.Email == null || model.Token == null)
+            {
+                return Unauthorized(new ApiResponse(401));
+            }
+
+            var user = await _userManager.FindByEmailAsync(model.Email);
+
+            if (user == null)
+            {
+                return Unauthorized(new ApiResponse(401));
+            }
+
+            if (await _userManager.VerifyUserTokenAsync(user, _userManager.Options.Tokens.PasswordResetTokenProvider, "ResetPassword", model.Token) == false)
+            {
+                return BadRequest(new ApiResponse(400, "Invalid Token"));
+            }
+
+            var result = await _userManager.ResetPasswordAsync(user, model.Token, model.Password);
+
+            if (result.Succeeded)
+            {
+                return Ok();
+            }
+
+            return BadRequest(new ApiResponse(400));
+        }
+
+        [HttpPost("refreshToken")]
+        public async Task<ActionResult<User>> RefreshToken()
+        {
+            var submittedRefreshToken = Request.Cookies["refreshToken"];
+
+            if (submittedRefreshToken == null)
+            {
+                return Unauthorized(new ApiResponse(401));
+            }
+
+            //var user = await _userManager.FindUserByEmailClaimsPrincipleAsync(HttpContext.User);
+            var user = await _userManager.FindByNameAsync(User.FindFirst(ClaimTypes.Name).Value);
+            //var user = await _userManager.FindByIdAsync(int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value).ToString());
+
+
+            if (user == null)
+            {
+                return Unauthorized(new ApiResponse(401));
+            }
+            var appUser = await _userManager.Users.Include(p => p.Photos).Include(r => r.RefreshTokens)
+                .FirstOrDefaultAsync(u => u.NormalizedUserName == user.UserName.ToUpper());
+            var refreshToken = UpdateRefreshToken(appUser, submittedRefreshToken);
+
+            if (refreshToken == null)
+            {
+                return Unauthorized(new ApiResponse(401));
+            }
+
+            appUser.RefreshTokens.Add(refreshToken);
+
+            await _userManager.UpdateAsync(user);
+
+            var userToReturn = _mapper.Map<UserForRefreshTokenDto>(appUser);
+
+            SetTokenCookie(userToReturn.RefreshToken);
+
+            await _repo.SaveAll();
+
+            return Ok(new
+            {
+                token = _tokenService.GenerateJwtToken(user).Result,
+                user = userToReturn,
+            });
+      
+        }
+
+        [HttpPost("revokeToken")]
+        public async Task<ActionResult> RevokeToken()
+        {
+            var submittedRefreshToken = Request.Cookies["refreshToken"];
+
+            if (submittedRefreshToken == null)
+            {
+                return Unauthorized(new ApiResponse(401));
+            }
+
+            //var user = await _userManager.FindUserByEmailClaimsPrincipleAsync(HttpContext.User);
+            //var user = await _userManager.FindByIdAsync(int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value).ToString());
+            var user = await _userManager.FindByNameAsync(User.FindFirst(ClaimTypes.Name).Value);
+
+            if (user == null)
+            {
+                return Unauthorized(new ApiResponse(401));
+
+            }
+
+            var appUser = await _userManager.Users.Include(r => r.RefreshTokens)
+                .FirstOrDefaultAsync(u => u.NormalizedUserName == user.UserName.ToUpper());
+
+            var revokedToken = RevokeRefreshToken(appUser, submittedRefreshToken);
+
+            if (revokedToken == null)
+            {
+                return Unauthorized(new ApiResponse(401));
+            }
+
+            var inactiveRefreshTokens = appUser.RefreshTokens.Where(r => r.IsActive == false ).OrderBy(r => r.Expires).ToList();
+
+            if (inactiveRefreshTokens.Count > 5)
+            {
+                var overflowInactiveTokens = inactiveRefreshTokens.Take(inactiveRefreshTokens.Count - 4);
+                foreach (RefreshToken token in overflowInactiveTokens)
+                {
+                    _repo.Delete(token);
+                }
+            }
+
+            appUser.IsOnline = false;
+            await _repo.SaveAll();
+
+            SetTokenCookie(revokedToken.Token);
+
+            return Ok();
+
+        }
+
+        private RefreshToken UpdateRefreshToken(User user, string refreshToken)
+        {
+            var inputRefreshToken = refreshToken;
+            var oldRefreshToken = user.RefreshTokens.SingleOrDefault(x => x.Token == refreshToken);
+
+            if (oldRefreshToken != null && oldRefreshToken.IsActive == false)
+            {
+                return null;
+            }
+            if (oldRefreshToken != null)
+            {
+                oldRefreshToken.Revoked = DateTime.UtcNow;
+            }
+
+            var newRefreshToken = _tokenService.GenerateRefreshToken();
+
+            return newRefreshToken;
+        }
+
+        private RefreshToken RevokeRefreshToken(User user, string refreshToken)
+        {
+            var inputRefreshToken = refreshToken;
+            var oldRefreshToken = user.RefreshTokens.SingleOrDefault(x => x.Token == refreshToken);
+
+            if (oldRefreshToken != null && oldRefreshToken.IsActive == false)
+            {
+                return null;
+            }
+            if (oldRefreshToken != null)
+            {
+                oldRefreshToken.Revoked = DateTime.UtcNow;
+            }
+
+            return oldRefreshToken;
+        }
+
+        private void SetTokenCookie(string refreshToken)
+        {
+            var cookieOptions = new CookieOptions
+            {
+                HttpOnly = true,
+                Secure = true,
+                SameSite = SameSiteMode.Strict,
+                Expires = DateTime.UtcNow.AddHours(1)
+            };
+            Response.Cookies.Append("refreshToken", refreshToken, cookieOptions);
+        }
+
     }
 }

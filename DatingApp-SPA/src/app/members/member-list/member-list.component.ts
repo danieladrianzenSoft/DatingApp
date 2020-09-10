@@ -14,15 +14,17 @@ import { ChatService } from 'src/app/_services/chat.service';
 })
 export class MemberListComponent implements OnInit {
   users: User[];
-  user: User = JSON.parse(localStorage.getItem('user'));
+  // user: User = JSON.parse(localStorage.getItem('user'));
+  user: User;
   genderList = [{value: 'male', display: 'Males'}, {value: 'female', display: 'females'}];
   userParams: any = {};
   pagination: Pagination;
 
   constructor(private userService: UserService, private alertify: AlertifyService,
-              private route: ActivatedRoute) { }
+              private route: ActivatedRoute, private authService: AuthService) { }
 
   ngOnInit(): any {
+    this.user = this.authService.currentUser;
     this.route.data.subscribe(data => {
       this.users = data.users.result;
       this.pagination = data.users.pagination;

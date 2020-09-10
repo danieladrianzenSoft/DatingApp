@@ -34,20 +34,20 @@
         <div class="col-sm-8">
             <div class="tab-panel">
                 <tabset class="member-tabset" #memberTabs>
-                    <tab heading="About {{user.displayName}}">
+                    <tab heading="About {{user.displayName}}" (selectTab)="changeTab($event)">
                         <h4 class="mt-1">Description</h4>
                         <p>{{user.introduction || user.displayName + " has not added a description yet"}}</p>
                         <h4>Looking For</h4>
                         <p>{{user.lookingFor || user.displayName + " has not add any preferences"}}</p>
                     </tab>
-                    <tab heading="Interests">
+                    <tab heading="Interests" (selectTab)="changeTab($event)">
                         <h4 class="mt-1">Interests</h4>
                         <p>{{user.interests || user.displayName + " has not added any interests yet"}}</p>
                     </tab>
-                    <tab heading="Photos">
+                    <tab heading="Photos" (selectTab)="changeTab($event)">
                         <ngx-gallery [options]="galleryOptions" [images]="galleryImages"></ngx-gallery>
                     </tab>
-                    <tab heading="Messages">
+                    <tab heading="Messages" (selectTab)="changeTab($event)">
                         <app-member-messages [recipient]="user"></app-member-messages>
                     </tab>
                 </tabset>

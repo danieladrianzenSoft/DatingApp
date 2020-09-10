@@ -17,6 +17,7 @@ import { LoginComponent } from './login/login.component';
 import { RegisterComponent } from './register/register.component';
 import { ConfirmEmailComponent } from './verify-account/confirm-email/confirm-email';
 import { ConfirmEmailResolver } from './_resolvers/confirm-email.resolver';
+import { ResetPasswordComponent } from './password-reset/reset-password/reset-password.component';
 // import { AwaitingEmailVerificationComponent } from './verify-account/awaiting-email-verification/awaiting-email-verification.component';
 
 export const appRoutes: Routes = [
@@ -38,8 +39,8 @@ export const appRoutes: Routes = [
     },
     {path: 'login', component: LoginComponent, data: {navbar: false}},
     {path: 'register', component: RegisterComponent, data: {navbar: false}},
-    {path: 'confirm-email', pathMatch: 'full', component: ConfirmEmailComponent,
-    resolve: {isVerified: ConfirmEmailResolver}},
+    {path: 'confirm-email', pathMatch: 'full', component: ConfirmEmailComponent, resolve: {isVerified: ConfirmEmailResolver}},
+    {path: 'reset-password', pathMatch: 'full', component: ResetPasswordComponent},
     // {path: 'awaiting-email-verification', component: AwaitingEmailVerificationComponent},
     {path: '**', redirectTo: '', pathMatch: 'full'}
 ];

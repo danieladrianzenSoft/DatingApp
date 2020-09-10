@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using AutoMapper;
+using DatingApp.API.Dtos;
 using DatingApp.API.Helpers;
 using DatingApp.API.Models;
 using Microsoft.EntityFrameworkCore;
@@ -11,10 +13,12 @@ namespace DatingApp.API.Data
     public class DatingRepository : IDatingRepository
     {
         private readonly DataContext _context;
+        private readonly IMapper _mapper;
 
-        public DatingRepository(DataContext context)
+        public DatingRepository(DataContext context, IMapper mapper)
         {
             _context = context;
+            _mapper = mapper;
         }
 
         public void Add<T>(T entity) where T : class
@@ -161,15 +165,6 @@ namespace DatingApp.API.Data
                     })
                 .ToListAsync();
 
-            //var query = await messages.Select(m => new
-            //{
-            //    conversation = new
-            //    {
-            //        conversationId = m.RecipientId != messageParams.UserId ? m.RecipientId : m.SenderId
-            //    },
-            //    message = m
-            //}).ToListAsync();
-
             var result = messages
                 .GroupBy(l => l.conversation.conversationId)
                 .Select(m => m.OrderByDescending(c => c.message.MessageSent).FirstOrDefault().message);
@@ -219,20 +214,113 @@ namespace DatingApp.API.Data
             return result.OrderByDescending(m => m.MessageSent);
         }
 
-        public async Task<IEnumerable<Message>> GetMessageThread(int userId, int recipientId)
+        public int GetNumberUnreadMessagesForUser(MessageParams messageParams)
         {
-            var messages = await _context.Messages
+            var numberUnreadMessages = _context.Messages
+                .Include(u => u.Sender).ThenInclude(p => p.Photos)
+                .Include(u => u.Recipient).ThenInclude(p => p.Photos)
+                .Where(u => u.RecipientId == messageParams.UserId
+                        && u.IsRead == false && u.RecipientDeleted == false)
+                .Count();
+
+            return numberUnreadMessages;
+        }
+
+        public async Task<PagedList<Message>> GetMessageThread(int userId, int recipientId, MessageParams messageParams)
+        {
+            var messages = _context.Messages
                 .Include(u => u.Sender).ThenInclude(p => p.Photos)
                 .Include(u => u.Recipient).ThenInclude(p => p.Photos)
                 .Where(m => m.RecipientId == userId && m.RecipientDeleted == false
                     && m.SenderId == recipientId
                     || m.RecipientId == recipientId && m.SenderId == userId
                     && m.SenderDeleted == false)
-                .OrderBy (m => m.MessageSent)
+                //.OrderBy(m => m.MessageSent);
+                .OrderByDescending(m => m.MessageSent);
+
+            return await PagedList<Message>.CreateAsync(messages, messageParams.PageNumber, messageParams.PageSize);
+
+        }
+
+        public async Task<IEnumerable<Message>> GetMessageThreadForDeletion(int userId, int recipientId)
+        {
+            var messages = await _context.Messages
+                .Where(m => m.RecipientId == userId && m.RecipientDeleted == false
+                    && m.SenderId == recipientId
+                    || m.RecipientId == recipientId && m.SenderId == userId
+                    && m.SenderDeleted == false)
+                .OrderBy(m => m.MessageSent)
                 .ToListAsync();
 
+                //.OrderBy(m => m.MessageSent);
+                //.OrderByDescending(m => m.MessageSent)
+
+
+            //var firstPage = (int)Math.Ceiling(messages.Count() / (double)messageParams.PageSize);
+
+
+            //.ToListAsync();
+
+
+            //return await PagedList<Message>.CreateAsync(messages, firstPage, messageParams.PageSize);
             return messages;
-                
+
         }
+
+        //public async Task<MessageThreadEnvelope> GetMessageThread(int userId, int recipientId, VerticalPaginationParams verticalPaginationParams)
+        //{
+        //    var messages = _context.Messages
+        //        .Include(u => u.Sender).ThenInclude(p => p.Photos)
+        //        .Include(u => u.Recipient).ThenInclude(p => p.Photos)
+        //        .Where(m => m.RecipientId == userId && m.RecipientDeleted == false
+        //            && m.SenderId == recipientId
+        //            || m.RecipientId == recipientId && m.SenderId == userId
+        //            && m.SenderDeleted == false)
+        //        .OrderBy(m => m.MessageSent);
+
+        //    var messageCount = messages.Count();
+
+        //    var messagesToReturn = _mapper.Map<List<MessageToReturnDto>>(await messages
+        //        .Skip(verticalPaginationParams.Offset ?? 0)
+        //        .Take(verticalPaginationParams.Limit ?? 10)
+        //        .ToListAsync());
+
+        //    return new MessageThreadEnvelope
+        //    {
+        //        Messages = messagesToReturn,
+        //        MessagesCount = messageCount
+        //    };
+
+        //    //var messages = await _context.Messages
+        //    //    .Include(u => u.Sender).ThenInclude(p => p.Photos)
+        //    //    .Include(u => u.Recipient).ThenInclude(p => p.Photos)
+        //    //    .Where(m => m.RecipientId == userId && m.RecipientDeleted == false
+        //    //        && m.SenderId == recipientId
+        //    //        || m.RecipientId == recipientId && m.SenderId == userId
+        //    //        && m.SenderDeleted == false)
+        //    //    .OrderBy(m => m.MessageSent)
+        //    //    .Skip(verticalPaginationParams.Offset ?? 0)
+        //    //    .Take(verticalPaginationParams.Limit ?? 10)
+        //    //    .ToListAsync();
+
+        //    //var messagesToReturn = _mapper.Map<List<MessageToReturnDto>>(messages);
+
+        //    //return new MessageThreadEnvelope
+        //    //{
+        //    //    Messages = messagesToReturn,
+        //    //    MessagesCount = messagesToReturn.Count()
+        //    //};
+
+        //    //var totalMessages = messages.Count();
+
+        //    //return await PagedList<Message>.CreateAsync(messages, messageParams.PageNumber, messageParams.PageSize);
+
+        //    //return await PagedList<Message>.CreateAsync(result,
+        //    //    messageParams.PageNumber, messageParams.PageSize);
+
+        //    //return messagesPaged.ToList();
+
+        //}
+
     }
 }

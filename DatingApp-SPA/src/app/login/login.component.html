@@ -1,4 +1,4 @@
-<div *ngIf="showNotVerified==false" class="container mt-5">
+<div *ngIf="showNotVerified==false && showForgotPassword==false" class="container mt-5">
     <div class="container">
         <div class="row justify-content-center">
             <div *ngIf="loggedIn()==false" class="col-lg-4 col-md-5 col-sm-6">
@@ -19,10 +19,14 @@
                     </div>
                 </form>
                 <p class="text-center mt-4">Don't have an account yet? <span class="text-primary font-weight-bold" style="cursor:pointer" [routerLink]="['/register']" routerLinkActive="router-link-active">Sign up</span></p> 
+                <p class="text-center" style="font-size:smaller; margin-top:-10px; color:rgb(135, 142, 149);"><span style="cursor:pointer;" (click)="ForgotPassword()">Forgot Password?</span></p>
             </div>
         </div>
     </div>
 </div>
-<div *ngIf="showNotVerified==true" style="text-align: center">
+<div *ngIf="showNotVerified==true && showForgotPassword==false" style="text-align: center">
         <app-awaiting-email-verification [loginInfo]="loginInfo"></app-awaiting-email-verification>
+</div>
+<div *ngIf="showForgotPassword==true" style="text-align: center">
+    <app-forgot-password (showForgotPassword)="showForgotPassword=false"></app-forgot-password>
 </div>
